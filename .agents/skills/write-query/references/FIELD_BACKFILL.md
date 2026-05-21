@@ -32,7 +32,8 @@ runtime: true
 ## 不补表边界
 
 - 任意产品入网量、新装量、到达量的主表默认保持 069 全业务资料表；不要因为“宽带/移动/固话/视联网”等产品词切到专项清单。
-- 只需要状态、动作、原因等码值含义时，不 JOIN 字典表；按需读取字典 md，把码值写进 WHERE 或输出解释。
+- 只需要状态、动作、原因等码值含义且**仅用于 WHERE 过滤**时，优先读字典 md 写码值，可不 JOIN 字典表。
+- **069.`state` 作为输出字段时**：默认交付 **码值 + 中文名**；补 `dws_crm_cfguse.dws_attr_value`（`attr_id='4000000201'`，`attr_value = state` → `attr_value_name`）。
 - 只需要销售品、产品、机构、销售员等名称补全时，补维表；不要因此改写主表。
 - 需求出现“主体编码 / 主体名称”时，默认指网点经营主体，直接补 021 揽装网点维表；不要全库搜索。
 - 只需要订单状态、受理时间、协销人等订单事实字段时，补订单/协销事实表；不要反向把订单表改成主表。
@@ -57,6 +58,7 @@ runtime: true
 | 双线月租 | 033 `yz_cs` | 069 不提供双线月租或用户明确要月租 | 033 双线全量清单 | `主表.acc_nbr = 033.acc_nbr` 且 `主表.par_month_id = 033.par_month_id` | 033 同号码同月可能多行，必要时按 `load_date` 去重 |
 | 客户名称 | `cust_name`、`cust_name_tm`、`cust_id` | 主表脱敏/不脱敏不满足时 | 客户表或 069 | 主表自带优先；跨表时按 `serv_id/cust_id` 谨慎关联 | 069 `cust_name_tm` 是脱敏名 |
 | 状态 / 动作含义 | `subs_stat`、`action_id`、`subs_stat_reason` | 需要解释或过滤码值 | `D_experience/dictionaries/{field}.md` | 不 JOIN，直接查码值后写 WHERE | WHERE 禁止中文状态 |
+| **服务状态 `state`（069）** | **`state`**（码值） | **输出状态字段或用户说「状态/号码状态」** | **`dws_crm_cfguse.dws_attr_value`**（`tables/015_字典表视图.md`） | `attr_id='4000000201'` AND `attr_value = cast(state as string)` → **`attr_value_name`** | **默认同时输出 `state` 码值与中文名**；勿用 `is_cancel_user` 等代替，除非用户明确要规模口径 |
 
 ## 补表确认输出模板
 

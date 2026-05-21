@@ -29,6 +29,7 @@ title: "字段缺口补表规则"
 | 揽装机构 | `salestaff_subst_id`、`salestaff_branch_id`、`salestaff_org_id` | 主表只有机构 ID，缺名称时补 | 机构维表 `dwd_yz_dim_org` | `salestaff_subst_id = org_id AND levs=3`；`salestaff_branch_id = org_id AND levs=4` | 多次 JOIN 时检查每个 ON 使用本次 JOIN 别名 |
 | 客户名称 | `cust_name`、`cust_name_tm`、`cust_id` | 主表有可用客户名时不补；脱敏/不脱敏不满足时再补 | 客户表或全业务资料表，按业务场景定 | 优先用主表自带客户名；需要跨表时按 `serv_id/cust_id` 谨慎关联 | 069 的 `cust_name_tm` 是脱敏客户名 |
 | 状态/动作含义 | `subs_stat`、`action_id`、`subs_stat_reason` | 需要中文解释或过滤码值时 | 字典文件 `dictionaries/{field}.md` | 不 JOIN，直接查字典后写码值 | SQL WHERE 不写中文状态 |
+| **服务状态 `state`（069）** | **`state`** | 用户说「状态/号码状态」，或输出状态列 | **`dws_crm_cfguse.dws_attr_value`** | `attr_id='4000000201'`，`attr_value=state` → `attr_value_name` | **默认输出码值+中文名**；勿用 `is_cancel_user` 等代替 |
 
 ## 场景例子
 
