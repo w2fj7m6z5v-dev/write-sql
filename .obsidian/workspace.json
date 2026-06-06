@@ -90,7 +90,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "069_全业务资料表.md",
+                "file": "references/metrics/业务口径库.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -100,7 +100,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "069_全业务资料表 的反向链接列表"
+              "title": "业务口径库 的反向链接列表"
             }
           },
           {
@@ -109,12 +109,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "069_全业务资料表.md",
+                "file": "references/metrics/业务口径库.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "069_全业务资料表 的出链列表"
+              "title": "业务口径库 的出链列表"
             }
           },
           {
@@ -152,7 +152,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "claude/skills/references/metrics/业务口径库.md",
+                "file": "references/metrics/业务口径库.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -162,7 +162,7 @@
             }
           },
           {
-            "id": "55e000c1cd134dfb",
+            "id": "b159f6755f92a88a",
             "type": "leaf",
             "state": {
               "type": "claudian-view",
@@ -176,7 +176,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 948.5
+    "width": 650.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -190,43 +190,43 @@
       "claudian:Open Claudian": false
     }
   },
-  "active": "55e000c1cd134dfb",
+  "active": "b159f6755f92a88a",
   "lastOpenFiles": [
-    "claude/skills/write-query/references/metrics/专题/M-TOPIC-BB-004_宽带T+n拆机率.md",
-    "claude/skills/write-query/references/metrics/专题/M-TOPIC-BB-003_宽带T+n停机率.md",
-    "claude/skills/write-query/references/metrics/专题/M-TOPIC-BB-002_宽带T+n欠费率.md",
-    "claude/skills/write-query/references/metrics/专题/M-TOPIC-BB-001_宽带T+n有效率.md",
-    "claude/skills/write-query/references/metrics/专题/M-TOPIC-BIZ-002_商企提值积分.md",
-    "claude/skills/write-query/references/metrics/专题/M-TOPIC-BIZ-001_商企新入网.md",
-    "claude/skills/write-query/references/metrics/专题/M-TOPIC-CLOUD-001_云桌面台数到达数.md",
-    "claude/skills/write-query/references/metrics/专题/商企.md",
-    "claude/skills/write-query/references/metrics/专题/宽带.md",
-    "claude/skills/write-query/references/metrics/专题/积分.md",
-    "claude/skills/write-query/references/metrics/INDEX.md",
-    "claude/skills/write-query/references/metrics/战新/移动.md",
-    "claude/skills/write-query/references/metrics/战新/小业务.md",
-    "claude/skills/write-query/references/metrics/战新/云业务.md",
-    "claude/skills/write-query/references/metrics/战新",
-    "claude/skills/write-query/references/metrics/基本面",
-    "claude/skills/write-query/references/metrics/专题",
-    "claude/skills/write-query/references/demand-cases/Q-20260427-001_按营服汇总主宽与129宽带入网.md",
-    "claude/skills/write-query/references/demand-cases/INDEX.md",
-    "claude/skills/write-query/references/demand-cases/_template.md",
-    "claude/skills/write-query/references/demand-cases",
-    "claude/skills/write-query/references/metric_bridge.md",
-    "claude/skills/write-query/references/metrics/README.md",
-    "claude/skills/write-query/references/metrics",
-    "claude/skills/write-query/references/KNOWLEDGE_LAYERS.md",
-    "claude/skills/write-query/references/tables/069_全业务资料表.md",
-    "claude/skills/write-query/references/tables/029_小微清单2024.md",
-    "claude/skills/write-query/references/069_全业务资料表.md",
-    "claude/skills/write-query/references/TABLE_INDEX.md",
-    "未命名 5.base",
-    "未命名 4.base",
-    "未命名 3.base",
-    "未命名 2.base",
-    "未命名 1.base",
-    "claude/skills/write-query/references/metric_table_map.md",
-    "claude/skills/write-query/references/指标字典.md"
+    "scripts/sync_skills.sh",
+    "scripts/sync_skills.ps1",
+    "docs/2026第一周sql案例/谢宇-XQGZ2026060100338.sql",
+    "docs/2026第一周sql案例/谢宇-XQGZ2026052202402.sql",
+    "docs/2026第一周sql案例/谢宇-XQGZ2026052100129.sql",
+    "docs/2026第一周sql案例/第1题_朱创伟_20260605_3. 净增积分_3.sql",
+    "docs/2026第一周sql案例/第1题_朱创伟_20260605_2. 电信到家_2.sql",
+    "docs/2026第一周sql案例/第1题_朱创伟_20260605_1. 揽装积分号码_1.sql",
+    "docs/2026第一周sql案例/第1题_钟雨君_20260605_XQGZ2026052101801_吴岱颖_关于提取快捷宽带7级地址ID的需求_2.sql",
+    "docs/2026第一周sql案例/第1题_钟雨君_20260605_XQGZ2026032501406_刘颖妍_关于广州市越秀区人民政府黄花岗街道办事处核查固话使用记录_1.sql",
+    "docs/2026第一周sql案例/第1题_钟雨君_20260605_XQGZ2025071101688_郑旭文_广州跨越速运有限公司主副卡关系_3.sql",
+    "docs/GITEE协作指引.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/基本面/移动.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/基本面/宽带.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/基本面/双线.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/战新/移动.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/战新/小业务.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/战新/云业务.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/专题/移动.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/专题/积分.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/专题/收入.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/专题/小业务.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/专题/宽带.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/专题/商企.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/指标字典/专题/云业务.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/099_医保未竣工清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/104_降档清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/103_存量专线提（降）值清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/101_台阶收入清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/100_欠补列日清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/098_医保竣工清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/097_基本面月清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/096_酒宽续约清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/095_历史欠不列月清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/093_移动宽带质态监控多维表-宽带清单.md",
+    "archive/cleanup-20260503/write-query-workspace/skill-snapshot/references/tables/092_网点保证金.md"
   ]
 }

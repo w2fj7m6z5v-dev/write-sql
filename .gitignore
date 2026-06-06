@@ -4,3 +4,8 @@ Thumbs.db
 __pycache__/
 *.pyc
 *.base
+
+# Local tool state
+.claudian/
+.vscode/
+.obsidian/workspace.json

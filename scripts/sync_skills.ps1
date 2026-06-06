@@ -1,146 +1,233 @@
 <#
 .SYNOPSIS
-    把 .claude/skills/ 单源镜像到 .agents/skills/（及未来其他目标），保证多 agent 工具读到同一份技能资产。
+    Check or synchronize the dual skill entrypoints used by Codex and Claude Code.
 
 .DESCRIPTION
-    单源维护策略：所有 skill 修改只在 .claude/skills/ 下进行；执行本脚本会用 robocopy /MIR 把
-    .claude/skills/ 完整镜像到目标目录（默认 .agents/skills/），并在目标目录顶层写入 .MIRROR
-    标记文件和 _MIRROR_README.md 说明。
+    This repository keeps two skill entrypoints:
 
-    脚本默认排除 *-workspace 目录（如 write-query-workspace/），它们是评测/迭代工作区，不属于
-    skill 资产。
+    - .agents/skills/  for Codex
+    - .claude/skills/  for Claude Code
 
-.PARAMETER Targets
-    一个或多个镜像目标目录名（相对仓库根）。默认: .agents。可扩展为 ".agents,.codex"。
+    They are dual entrypoints, not a default one-way mirror. By default this script
+    only checks whether the two directories are identical. Synchronization requires
+    an explicit source direction so accidental overwrites are harder to make.
 
-.PARAMETER DryRun
-    仅打印 robocopy 将做什么，不实际修改文件。
+.PARAMETER Mode
+    Check only, or synchronize in an explicit direction. Default: Check.
+
+.PARAMETER From
+    Source side when Mode is Sync. Use "agents" to copy .agents/skills to
+    .claude/skills, or "claude" for the reverse.
+
+.PARAMETER Force
+    Required for Mode Sync. This is an explicit acknowledgement that the target
+    skills directory will be replaced by the source skills directory.
 
 .PARAMETER ExcludeDirs
-    需要从镜像中排除的目录名（不含路径，按通配匹配）。默认: *-workspace。
+    Directory names or wildcard patterns to ignore. Default: *-workspace.
 
 .EXAMPLE
     pwsh scripts/sync_skills.ps1
-    # 默认镜像到 .agents/skills/
+    # Check whether .agents/skills and .claude/skills match.
 
 .EXAMPLE
-    pwsh scripts/sync_skills.ps1 -DryRun
-    # 打印将做的事情，但不真改
+    pwsh scripts/sync_skills.ps1 -Mode Sync -From agents -Force
+    # Replace .claude/skills with .agents/skills.
 
 .EXAMPLE
-    pwsh scripts/sync_skills.ps1 -Targets ".agents",".codex"
-    # 同时镜像到 .agents/skills 和 .codex/skills
+    pwsh scripts/sync_skills.ps1 -Mode Sync -From claude -Force
+    # Replace .agents/skills with .claude/skills.
 #>
 [CmdletBinding()]
 param(
-    [string[]]$Targets = @(".agents"),
-    [switch]$DryRun,
+    [ValidateSet("Check", "Sync")]
+    [string]$Mode = "Check",
+
+    [ValidateSet("agents", "claude")]
+    [string]$From,
+
+    [switch]$Force,
+
     [string[]]$ExcludeDirs = @("*-workspace")
 )
 
 $ErrorActionPreference = "Stop"
 
-$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$Source = Join-Path $RepoRoot ".claude\skills"
+function Get-RelativePathPortable {
+    param(
+        [Parameter(Mandatory = $true)][string]$BasePath,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
 
-if (-not (Test-Path $Source)) {
-    Write-Error "源目录不存在: $Source"
+    $base = [System.IO.Path]::GetFullPath($BasePath).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $full = [System.IO.Path]::GetFullPath($Path)
+
+    if ($full.StartsWith($base)) {
+        return $full.Substring($base.Length).TrimStart([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    }
+
+    return $full
+}
+
+function Test-ExcludedPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [Parameter(Mandatory = $true)][string[]]$Patterns
+    )
+
+    if ([string]::IsNullOrWhiteSpace($RelativePath)) {
+        return $false
+    }
+
+    $parts = $RelativePath -split "[/\\]+"
+    foreach ($part in $parts) {
+        foreach ($pattern in $Patterns) {
+            if ($part -like $pattern) {
+                return $true
+            }
+        }
+    }
+
+    return $false
+}
+
+function Get-SkillFileMap {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string[]]$ExcludeDirs
+    )
+
+    if (-not (Test-Path $Root)) {
+        throw "Skills directory does not exist: $Root"
+    }
+
+    $map = @{}
+    Get-ChildItem -Path $Root -Recurse -File | ForEach-Object {
+        $relative = Get-RelativePathPortable -BasePath $Root -Path $_.FullName
+        if (Test-ExcludedPath -RelativePath $relative -Patterns $ExcludeDirs) {
+            return
+        }
+
+        $normalized = $relative -replace "\\", "/"
+        $hash = Get-FileHash -Algorithm SHA256 -Path $_.FullName
+        $map[$normalized] = $hash.Hash
+    }
+
+    return $map
+}
+
+function Compare-SkillTrees {
+    param(
+        [Parameter(Mandatory = $true)][string]$AgentsRoot,
+        [Parameter(Mandatory = $true)][string]$ClaudeRoot,
+        [Parameter(Mandatory = $true)][string[]]$ExcludeDirs
+    )
+
+    $agents = Get-SkillFileMap -Root $AgentsRoot -ExcludeDirs $ExcludeDirs
+    $claude = Get-SkillFileMap -Root $ClaudeRoot -ExcludeDirs $ExcludeDirs
+    $allPaths = @($agents.Keys + $claude.Keys) | Sort-Object -Unique
+    $diffs = @()
+
+    foreach ($path in $allPaths) {
+        $inAgents = $agents.ContainsKey($path)
+        $inClaude = $claude.ContainsKey($path)
+
+        if (-not $inAgents) {
+            $diffs += [pscustomobject]@{ Status = "OnlyInClaude"; Path = $path }
+        } elseif (-not $inClaude) {
+            $diffs += [pscustomobject]@{ Status = "OnlyInAgents"; Path = $path }
+        } elseif ($agents[$path] -ne $claude[$path]) {
+            $diffs += [pscustomobject]@{ Status = "Different"; Path = $path }
+        }
+    }
+
+    return $diffs
+}
+
+function Copy-SkillTree {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceRoot,
+        [Parameter(Mandatory = $true)][string]$TargetRoot,
+        [Parameter(Mandatory = $true)][string[]]$ExcludeDirs
+    )
+
+    if (-not (Test-Path $SourceRoot)) {
+        throw "Source skills directory does not exist: $SourceRoot"
+    }
+
+    if (Test-Path $TargetRoot) {
+        Remove-Item -Path $TargetRoot -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $TargetRoot -Force | Out-Null
+
+    Get-ChildItem -Path $SourceRoot -Recurse | ForEach-Object {
+        $relative = Get-RelativePathPortable -BasePath $SourceRoot -Path $_.FullName
+        if (Test-ExcludedPath -RelativePath $relative -Patterns $ExcludeDirs) {
+            return
+        }
+
+        $targetPath = Join-Path $TargetRoot $relative
+        if ($_.PSIsContainer) {
+            New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+        } else {
+            $targetDir = Split-Path -Parent $targetPath
+            New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+            Copy-Item -Path $_.FullName -Destination $targetPath -Force
+        }
+    }
+}
+
+$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$AgentsRoot = Join-Path $RepoRoot ".agents/skills"
+$ClaudeRoot = Join-Path $RepoRoot ".claude/skills"
+
+Write-Host ("=== skill entrypoint check ({0}) ===" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss")) -ForegroundColor Cyan
+Write-Host ("Repo:   {0}" -f $RepoRoot)
+Write-Host ("Codex:  {0}" -f $AgentsRoot)
+Write-Host ("Claude: {0}" -f $ClaudeRoot)
+Write-Host ("Exclude dirs: {0}" -f ($ExcludeDirs -join ", "))
+
+$diffs = Compare-SkillTrees -AgentsRoot $AgentsRoot -ClaudeRoot $ClaudeRoot -ExcludeDirs $ExcludeDirs
+
+if ($Mode -eq "Check") {
+    if ($diffs.Count -eq 0) {
+        Write-Host "Skills are in sync." -ForegroundColor Green
+        exit 0
+    }
+
+    Write-Host ("Skills differ ({0} file differences):" -f $diffs.Count) -ForegroundColor Yellow
+    $diffs | Select-Object -First 200 | Format-Table -AutoSize
+    if ($diffs.Count -gt 200) {
+        Write-Host ("... {0} more differences omitted" -f ($diffs.Count - 200)) -ForegroundColor Yellow
+    }
+    Write-Host "Run with -Mode Sync -From agents -Force or -Mode Sync -From claude -Force after choosing a source." -ForegroundColor Yellow
+    exit 2
+}
+
+if ([string]::IsNullOrWhiteSpace($From)) {
+    Write-Error "Mode Sync requires -From agents or -From claude."
     exit 1
 }
 
-Write-Host ("=== sync_skills 启动 ({0}) ===" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss")) -ForegroundColor Cyan
-Write-Host ("仓库根: {0}" -f $RepoRoot)
-Write-Host ("源目录: {0}" -f $Source)
-Write-Host ("目标: {0}" -f ($Targets -join ", "))
-Write-Host ("排除子目录: {0}" -f ($ExcludeDirs -join ", "))
-if ($DryRun) {
-    Write-Host "*** DryRun 模式：不会修改任何文件 ***" -ForegroundColor Yellow
+if (-not $Force) {
+    Write-Error "Mode Sync replaces the target skills directory. Re-run with -Force after choosing the source intentionally."
+    exit 1
 }
 
-$exitCodeMax = 0
-
-foreach ($targetName in $Targets) {
-    $TargetSkills = Join-Path $RepoRoot ("{0}\skills" -f $targetName)
-    Write-Host ""
-    Write-Host ("--- 镜像 → {0} ---" -f $TargetSkills) -ForegroundColor Cyan
-
-    if (-not (Test-Path $TargetSkills)) {
-        if ($DryRun) {
-            Write-Host "  (DryRun) 将创建目标目录: $TargetSkills"
-        } else {
-            New-Item -ItemType Directory -Path $TargetSkills -Force | Out-Null
-            Write-Host "  已创建目标目录: $TargetSkills"
-        }
-    }
-
-    $robocopyArgs = @($Source, $TargetSkills, "/MIR", "/NFL", "/NDL", "/NJH", "/NJS", "/NC", "/NS", "/NP")
-    if ($ExcludeDirs.Count -gt 0) {
-        $robocopyArgs += "/XD"
-        $robocopyArgs += $ExcludeDirs
-    }
-    if ($DryRun) {
-        $robocopyArgs += "/L"
-    }
-
-    Write-Host ("  robocopy {0}" -f ($robocopyArgs -join " "))
-    & robocopy @robocopyArgs | Out-Null
-    $rc = $LASTEXITCODE
-    if ($rc -ge 8) {
-        Write-Error ("robocopy 失败，退出码 {0}" -f $rc)
-        exit $rc
-    }
-    if ($rc -gt $exitCodeMax) { $exitCodeMax = $rc }
-    Write-Host ("  robocopy 完成，退出码 {0} (0=无变化, 1=有复制, 2=有额外, 3=复制+额外, <8 视为成功)" -f $rc)
-
-    if (-not $DryRun) {
-        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz"
-        $markerPath = Join-Path $TargetSkills ".MIRROR"
-        $marker = "Generated from .claude/skills/ by scripts/sync_skills.ps1 at $timestamp.`r`nDO NOT EDIT.`r`n"
-        Set-Content -Path $markerPath -Value $marker -Encoding UTF8 -NoNewline
-
-        $writeQueryDir = Join-Path $TargetSkills "write-query"
-        if (Test-Path $writeQueryDir) {
-            $readmePath = Join-Path $writeQueryDir "_MIRROR_README.md"
-            $readme = @"
-# 镜像目录
-
-本目录由 ``scripts/sync_skills.ps1`` 从 ``.claude/skills/write-query/`` 自动生成。
-
-**请勿在此手改**。任何修改都应在 ``.claude/skills/write-query/`` 下进行，然后重新运行：
-
-``````powershell
-pwsh scripts/sync_skills.ps1
-``````
-
-最近一次同步：$timestamp
-"@
-            Set-Content -Path $readmePath -Value $readme -Encoding UTF8
-        }
-
-        $excelDir = Join-Path $TargetSkills "excel-to-table-md"
-        if (Test-Path $excelDir) {
-            $readmePath = Join-Path $excelDir "_MIRROR_README.md"
-            $readme = @"
-# 镜像目录
-
-本目录由 ``scripts/sync_skills.ps1`` 从 ``.claude/skills/excel-to-table-md/`` 自动生成。
-
-**请勿在此手改**。任何修改都应在 ``.claude/skills/excel-to-table-md/`` 下进行，然后重新运行：
-
-``````powershell
-pwsh scripts/sync_skills.ps1
-``````
-
-最近一次同步：$timestamp
-"@
-            Set-Content -Path $readmePath -Value $readme -Encoding UTF8
-        }
-    }
+if ($From -eq "agents") {
+    Write-Host "Syncing .agents/skills -> .claude/skills" -ForegroundColor Cyan
+    Copy-SkillTree -SourceRoot $AgentsRoot -TargetRoot $ClaudeRoot -ExcludeDirs $ExcludeDirs
+} else {
+    Write-Host "Syncing .claude/skills -> .agents/skills" -ForegroundColor Cyan
+    Copy-SkillTree -SourceRoot $ClaudeRoot -TargetRoot $AgentsRoot -ExcludeDirs $ExcludeDirs
 }
 
-Write-Host ""
-Write-Host ("=== sync_skills 完成（max robocopy rc = {0}）===" -f $exitCodeMax) -ForegroundColor Green
-if ($DryRun) {
-    Write-Host "DryRun 模式下未修改任何文件。" -ForegroundColor Yellow
+$postDiffs = Compare-SkillTrees -AgentsRoot $AgentsRoot -ClaudeRoot $ClaudeRoot -ExcludeDirs $ExcludeDirs
+if ($postDiffs.Count -eq 0) {
+    Write-Host "Sync complete. Skills are in sync." -ForegroundColor Green
+    exit 0
 }
-exit 0
+
+Write-Host ("Sync completed but {0} differences remain:" -f $postDiffs.Count) -ForegroundColor Yellow
+$postDiffs | Select-Object -First 200 | Format-Table -AutoSize
+exit 2
