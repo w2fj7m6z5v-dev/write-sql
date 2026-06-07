@@ -28,6 +28,7 @@
 | 积分类 | 007 净增积分清单；012 发展存量积分清单；081 揽装积分清单；082 双线净增积分清单；091 财务部积分多维表 | 积分明细、积分汇总、财务积分 | 不要混用不同积分口径 |
 | 续约类 | 030 移动续约清单；032 宽带续约清单；065 双线续约清单；096 酒宽续约清单 | 移动/宽带/双线/酒店宽带续约 | 不要用新装或订单表替代续约事实 |
 | 降档/升降档 | 008/009 129+套餐升降档路径；010 降档原始清单；011 降档动作订单清单；104 降档清单 | 升降档路径、降档动作、降档明细 | 先区分路径、多维、动作、结果 |
+| 客户实体映射 / 客户信息维护 | 108 产权客户全量表；109 直销客户表 | 签订/维护直销客户；通过产权客户找直销客户；按客户信息更新客户资料 | 号码/服务明细要客户名、产权客户名、直销客户名时，优先用 069 或当前事实主表自带客户字段 |
 | 机构、销售员、协销补字段 | 018 机构维表；021 揽装网点维表；042 号码协销表；043 订单协销表 | 补机构层级、销售员、协销人 | 不要作为默认主表 |
 | 字典/码值中文名 | 015 字典表视图；016 字典维表视图 | 编码转中文、属性值解释 | 不要把码值表当业务事实表 |
 | 产品规格属性 / 特性历史快照 | 105 特性资料表 | 拆机前月主产品特性、历史某月 attr_id 特性值 | 不要用特性日表查已拆机历史；勿与 106 混用 |
@@ -138,3 +139,5 @@
 | 105 | 特性资料表 | summary_ods_day_city.tb_pre_cm_attr_all | summary_ods_day_city.tb_pre_cm_attr_all（日表）；iodata_ods_month_city.tb_pre_cm_attr_all_mon（月表） | tables/105_特性资料表.md | serv_id + attr_id；月表按 par_month_id 快照 | par_corp_id, par_month_id | **产品规格**属性/特性值；历史或拆机前月快照 | 日表只在网；附属产品走 106 |
 | 106 | 附属产品资料表 | summary_ods_day_city.rpt_comm_cm_subserv | summary_ods_day_city.rpt_comm_cm_subserv（日表）；iodata_ods_month_city.rpt_comm_cm_subserv_mon（月表） | tables/106_附属产品资料表.md | serv_id + attr_id；月表按 par_month_id 快照 | par_corp_id, par_month_id | **附属产品**属性/特性值；历史或拆机前月快照 | 日表只在网；产品规格走 105 |
 | 107 | 销售品参数表 | summary_ods_day_city.rpt_comm_cm_msparam | summary_ods_day_city.rpt_comm_cm_msparam | tables/107_销售品参数表.md | serv_id + prod_offer_id + param_code（以生产表为准） | par_corp_id | 销售品参数值补全；用户问折扣、赠金、统付金额、优惠参数等，先由 069/014 锁定 `serv_id` 与 `prod_offer_id` 后补 `param_value` | 不要作为销售品在档事实表；在档/到期时间先查 014；`param_code` 不可猜 |
+| 108 | 产权客户全量表 | dws_crm_cust.dws_customer | dws_crm_cust.dws_customer | tables/108_产权客户全量表.md | 产权客户粒度（以生产表为准） |  | 产权客户信息；按 `cust_name` 兜底补 `cust_number` | 客户名可能重名；有产权客户编码时优先编码匹配 |
+| 109 | 直销客户表 | zone_gz_yz.dws_yz_tb_mo_custgrp_cust_final | zone_gz_yz.dws_yz_tb_mo_custgrp_cust_final | tables/109_直销客户表.md | 产权客户到直销客户映射关系（以生产表为准） |  | 按 `cust_nbr` 补 `ccust_code`、`ccust_name`、机构 ID；机构名称再补 018 | 不要把机构 ID 字段脱离来源语义直接解释；可能一对多 |
