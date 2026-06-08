@@ -29,6 +29,7 @@ Before asking the user anything:
    - `RULES.md` for SQL audit rules.
    - `verified-cases/INDEX.md` only when a complex reusable flow may warrant a case.
 3. Check whether the knowledge already exists. Do not duplicate an existing rule under a new name.
+4. Check whether the case can already be implemented by existing general `write-query` routing, field backfill, and audit rules. If yes, do not propose new sedimentation; explain the reusable path and any case-specific parameters or口径 that still need confirmation.
 
 ## One-Case Confirmation Protocol
 
@@ -83,6 +84,8 @@ For each case, respond in this exact shape:
 
 Wait for user confirmation. If the user corrects a rule, update the proposed sedimentation before editing files.
 
+If the case is fully covered by existing general rules, respond with the case title, source file, the existing route that can implement it, the remaining parameters to confirm, and explicitly state that no skill files need to be updated.
+
 ## What To Sediment
 
 Prefer stable, reusable knowledge:
@@ -104,6 +107,7 @@ Do not write these into runtime knowledge as stable rules:
 - Broken SQL syntax copied from a case.
 - A parameter code, product code, or status code unless the user confirms it is a reusable business口径 or it is already verified elsewhere.
 - Full scripts inside `RULES.md`; use concise rules or a `verified-case` only when needed.
+- Cases that can already be implemented by existing general rules. For these, keep the runtime knowledge unchanged and only explain which existing route/table/rule handles the需求.
 
 ## Editing Workflow After Confirmation
 
