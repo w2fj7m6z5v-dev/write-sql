@@ -91,6 +91,7 @@ runtime: true
 | 市场化承包合同 / 合同下实际工号 | 结算账单合同网点 + 有效揽装人 | 110 结算账单表 → 113 揽装所属表 | 110 `contractno/contract_name/billing_cycle_id/channel_id`；113 `staff_id/sales_code/sales_man_nbr/sales_man_name` | 账期用 `substr(billing_cycle_id,1,6)` 对齐月表；实际工号数量优先按 `staff_id` 去重 |
 | 无号码收入网点诊断 | 网点有效性 + 揽装人有效性 | 112 网点维表 + 113 揽装所属表 + 111 揽装人维表 | 112 `status_cd`；113 有效网点有效揽装人关系；111 `status_cd` | 113 只含有效组合；缺记录需回查 112/111 区分无效网点、有效网点无揽装人、揽装人无效 |
 | 国际漫游 / 国漫开通 | 国际漫游权限开通号码 | 069 圈号码范围 → 114 国际漫游数据表 | 114 `msisdn/reserv1/reserv2/reserv3/reserv4/yyyymmdd` | `yyyymmdd` 是日分区/统计日；不要与 069 `par_month_id` 混用 |
+| 固话使用记录 / 固话使用时长 | 固话号码月使用记录 | 116 固话使用记录月表 | `acc_nbr/par_month_id/dur`；使用时长分钟=`dur/60` | 附件号码清单按 `acc_nbr` 匹配；广州加 `par_corp_id='200'`；严格到日需确认日级来源 |
 | 主副卡关系 / 副卡查主卡 | 移动副卡对应主卡号码 | 069 全业务资料表 | 附件副卡号码 = 069 `acc_nbr`；输出 `zk_acc_nbr` | 必须锁 `par_month_id`；移动号码建议加 `prod_type=30`；不默认加 `is_vice_card=1` |
 | 营服 / 所属营服 | **划小营服**（默认） | 主表机构字段 | 048/047/069 等：`branch_id`、`branch_name` | 未特别声明「揽装营服」时，**不用** `channel_branch_name`；揽装营服需用户点名 |
 | 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 / 040 / 041 等主表机构字段 | `subst_id`、`subst_name`、`branch_id`、`branch_name` | 与落地局向不同 |
@@ -182,6 +183,7 @@ runtime: true
 | 市场化承包合同下有效揽装人 / 实际工号数量 | 110 结算账单表 `dws_tpss_jszx.dws_settle_bill` | 113 揽装所属表 `_mon_final`；必要时回查 112 网点维表、111 揽装人维表 | 069、订单表、积分表、收入明细表 | 合同、结算账期、网点事实在结算账单表；按 `channel_id + substr(billing_cycle_id,1,6)` 补有效网点下有效揽装人；实际工号数量用 `count(distinct staff_id)` |
 | 无号码收入网点诊断 | 112 网点维表 `_mon_final` | 113 揽装所属表 `_mon_final`；111 揽装人维表 `_mon_final` | 号码表、收入表直接反推网点有效性 | 按账期和网点清单先判断网点是否无效；有效网点在 113 无记录表示无有效揽装人关系，再回查 111 区分揽装人无效 |
 | 国际漫游开通号码 / 国漫权限 | 114 国际漫游数据表 `dws_ctg.dws_mktag_download_share_guoman_label` | 069 全业务资料表补客户、产品、局向等号码属性 | 漫游结算收入表、订单表 | 本表内号码为已开通国际漫游权限号码；按 `msisdn` 关联 069 `acc_nbr`，按 `yyyymmdd` 锁统计日 |
+| 固话使用记录 / 使用时长 | 116 固话使用记录月表 `summary_ods_month_city.tb_comm_ywl_gw_mon` | 用户附件种子表 | 069、固话延伸核查清单、订单表 | 附件固话号码按 `acc_nbr` 匹配，`par_corp_id='200'`，`par_month_id` 限定月份范围，输出分钟=`dur/60`；一个号码多月多行正常 |
 | 号码清单导 IMSI | 069 全业务资料表 → 105 特性资料表 | 用户附件种子表 | 114 国际漫游数据表、`dws_crm_cust.dws_prod_inst_attr` | 先按号码和账期在 069 找 `serv_id`，再补 105 `attr_id='200000103'` 输出 `attr_value1` |
 | 客户经理 CRM 编码 / 揽装人 11 开头工号 | 069 全业务资料表 | 115 员工信息表 `dws_crm_cfguse.dws_staff` | 111 揽装人维表直接替代员工表 | 附件号码清单先按 `acc_nbr + par_month_id` 在 069 取当前 `serv_id/sales_code`，再补员工表 `staff_account/staff_name/staff_id`；员工表按 `status_date desc` 去重取最新 |
 | 主副卡关系 / 已知副卡查主卡 | 069 全业务资料表 | 用户附件种子表 | 订单表、客户表、融合关系表 | 附件副卡号码按 `acc_nbr + par_month_id` 匹配 069，移动号码建议 `prod_type=30`，直接输出 `zk_acc_nbr`；不默认加 `is_vice_card=1` |
