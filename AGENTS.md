@@ -40,6 +40,9 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 ### 查看可用表
 参考 `Codex/skills/write-query/references/TABLE_INDEX.md`，按业务主题（核心事实表、收入表、积分表、维表）查找目标表。
 
+### Git 提交
+- 本仓库提交信息使用中文描述。
+
 ## 工作流程
 
 ### 编写 Hive SQL
