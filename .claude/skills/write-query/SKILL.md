@@ -22,6 +22,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 | Column Linking / 字段映射 | 已锁主表的 `references/tables/*.md` |
 | Join Planning / 缺口补表 | `references/FIELD_BACKFILL.md`、补表对应的 `references/tables/*.md` |
 | SQL Generation + Review | `references/RULES.md`、相关 `references/D_experience/dictionaries/{field}.md`；复杂编排命中时读 `verified-cases/VC-20260520-001`（按 INDEX 相似度） |
+| Complex Scenario / 专项场景 | 需求命中附件驱动、跨表编排或专项诊断时，先读 `references/scenarios/INDEX.md`，再只打开命中的 `SC-*.md` |
 
 ## 运行时禁读
 
@@ -30,6 +31,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 - `references/D_experience/_archive/*`：已归档的老经验层（`business_glossary`、`table_routing`、`cdap_global_rules`、`anti_patterns`、`field_backfill`）。内容已并入 `ROUTING.md` / `FIELD_BACKFILL.md` / `RULES.md`。
 - `references/D_experience/lessons_learned.md`：仅复盘日志，不参与运行时决策。
 - `references/verified-cases/*.md`（除 `INDEX.md` 外）：仅当用户需求与 `INDEX.md` 中某案例「适用」列高度匹配时再打开命中案例，不要批量预读。
+- `references/scenarios/*.md`（除 `INDEX.md` 外）：仅当用户需求与 `INDEX.md` 中某场景「适用」列高度匹配时再打开命中场景，不要批量预读。
 - 任何 `*-workspace/`：评测/迭代工作区，不属于运行时资产。
 
 ## 路径选择（先判定）
@@ -295,6 +297,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 - 新字段补表规则：补 `references/FIELD_BACKFILL.md`。
 - 新硬规则或反模式：补 `references/RULES.md`（审计清单 / 专项审计项）。
 - 新码值：补对应 `references/D_experience/dictionaries/{field}.md`。
+- 新复杂专项链路、附件驱动流程或跨表诊断：优先补 `references/scenarios/SC-*.md`，并在 `references/scenarios/INDEX.md` 加一行；核心文件只保留短入口。
 - 新案例模板：在 `references/verified-cases/` 加 `VC-YYYYMMDD-NNN_<语义>.md`，并在 `verified-cases/INDEX.md` 加一行（注明「适用 / 不适用」）。
 - 只作为复盘的内容放 `references/D_experience/lessons_learned.md`，不要运行时加载。
 - **不要**回填到 `references/D_experience/_archive/`：那是已归档的老 D 层，不参与运行时。
