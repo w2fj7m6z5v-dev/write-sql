@@ -63,7 +63,7 @@ python .claude/skills/write-query/scripts/lint_metric_index.py
 
 - 老 D 层经验已并入 `ROUTING` / `FIELD_BACKFILL` / `RULES`；勿再编辑 `_archive/`。
 - 修改 ROUTING / FIELD_BACKFILL / RULES 时，检查是否与其它文件重复；重复则删副本、留指针。
-- **已废弃 table_id**：`013` 全业务资料表已合并入 `069`；勿再新建 `tables/013_*.md` 或在索引中登记 013。
+- **已废弃 table_id**：`013` 全业务资料表已合并入 `069`；`021` 揽装所属表已合并入 `113`；勿再新建对应旧文档或在索引中登记。
 
 ## 表文档合并原则
 

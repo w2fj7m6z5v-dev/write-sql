@@ -24,7 +24,7 @@
 | metric_id | metric_name | domain | category | period | cdap_process | table_files | metric_file |
 |---|---|---|---|---|---|---|---|
 | M-BASIC-BB-001 | 主宽入网数 | 基本面 | 宽带 | 日/月/年 | 全业务资料表 | tables/069_全业务资料表.md | metrics/基本面/M-BASIC-BB-001_主宽入网数.md |
-| M-BASIC-BB-002 | 主宽入网积分 | 基本面 | 宽带 | 日/月/年 | 全业务资料表（口径待补充） | tables/069_全业务资料表.md | metrics/基本面/M-BASIC-BB-002_主宽入网积分.md |
+| M-BASIC-BB-002 | 主宽入网积分 | 基本面 | 宽带 | 日/月/年 | 全业务资料表 | tables/069_全业务资料表.md | metrics/基本面/M-BASIC-BB-002_主宽入网积分.md |
 | M-BASIC-BB-003 | 主宽到达数 | 基本面 | 宽带 | 日/月/年 | 日生产 | tables/069_全业务资料表.md | metrics/基本面/M-BASIC-BB-003_主宽到达数.md |
 | M-BASIC-BB-004 | 129+宽带入网数 | 基本面 | 宽带 | 日/月/年 | 日生产 | tables/069_全业务资料表.md | metrics/基本面/M-BASIC-BB-004_129+宽带入网数.md |
 | M-BASIC-BB-005 | 融合新宽新移入网数 | 基本面 | 宽带 | 日/月/年 | 宽带新装清单 | tables/006_宽带新装清单.md | metrics/基本面/M-BASIC-BB-005_融合新宽新移入网数.md |

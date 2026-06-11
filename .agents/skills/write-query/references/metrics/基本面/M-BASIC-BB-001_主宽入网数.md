@@ -34,7 +34,7 @@ source_file: "宽带.md"
 - `kd_desc = '普通宽带'`
 - `is_new_user = 1`
 - `date_format(open_date, 'yyyyMM') = ${month_id}`
-- `prod_type = 30`
+- `prod_type = 40`
 
 ## 技术口径（SQL）
 
@@ -45,7 +45,7 @@ WHERE par_month_id = ${month_id}
   AND kd_desc = '普通宽带'
   AND is_new_user = 1
   AND date_format(open_date, 'yyyyMM') = '${month_id}'
-  AND prod_type = 30
+  AND prod_type = 40
 ;
 ```
 
