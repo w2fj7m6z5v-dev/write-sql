@@ -103,6 +103,7 @@ runtime: true
 | 销售品在档 / 有没有套餐 | 销售品存量 | 014 优惠资料表 | `serv_id + par_month_id + prod_offer_code`；名称 `prod_offer_name` | 「有没有」≠ 041 订购动作 |
 | 销售品参数 / 折扣 / 赠金 / 统付金额 | 销售品参数值 | 014 锁在档 → 107 补 `param_value`（号码清单可先 069 补 `serv_id`） | - | 主表路径 014；补表步骤见 `FIELD_BACKFILL.md` **§销售品参数值（107）** |
 | 设备名称 / 设备类型 / 购买方式 / 机身号 / 设备数量 | 设备资源信息 | 附件或 069 补 `serv_id` → 119 设备资源关系表 | `serv_id`；输出 `mkt_res_name/res_type/property_type_name/eqpt_sn/mkt_res_num` | 同一 `serv_id` 可能多设备；不要误选 090 终端装维成本或 105/106 特性表 |
+| 终端自注册机型 / 终端制式 / 手机厂商 / IMEI / IMSI | 终端自注册信息 | 附件号码或 069 `acc_nbr` → 123 终端自注册清单 | `acc_nbr`；输出 `terminal_type/brand_type/factory/brand/register_time/imsi/imei1/imei2` | 与 119 设备资源不同；一号一行默认按 `register_time` 取最新 |
 | 新装 / 入网 | 新入网规模 | 069 全业务资料表 | `is_new_user=1`、`open_date`、`subs_id` | 宽带、移动、固话及其它产品入网量默认都走 069 |
 | 到达 / 在网 / 出账 | 存量状态 | 069 全业务资料表 | `is_cz`、`is_cancel_user`、`is_online_user` | 规模类口径；**用户说「状态」见下行** |
 | 状态 / 号码状态 / 用户状态 | 服务状态码 + 中文名 | 069 全业务资料表 | **`state`**（码值）；中文 **`dws_attr_value.attr_value_name`**（`attr_id='4000000201'`） | **默认字段是 `state`，不是 `is_cancel_user` 等**；交付需 **码值 + 中文名**；详见 `FIELD_BACKFILL.md`、`VC-20260520-002` |
@@ -194,6 +195,7 @@ runtime: true
 | 指定套餐实例下的其他号码 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 014 优惠资料表取 `msobjgrp_id`，再按同 `msobjgrp_id` 找其他 `serv_id/acc_nbr`；必要时回 069 判断号码类型 | 041 优惠订单表；按单个销售品编码硬写成 WiFi/IPTV 专项 | `msobjgrp_id` 是套餐实例键；需求方给的销售品编码只是定位入口，同套餐下要取什么号码由需求过滤 |
 | 销售品参数 / 折扣 / 赠金 / 统付金额 | 014 优惠资料表（先锁在档销售品） | 069 补 `serv_id`；107 补 `param_value` | 041 优惠订单表；107 直接当主表 | 三步补表见 `FIELD_BACKFILL.md` **§销售品参数值（107）** |
 | 号码 / 服务清单补设备资源字段 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 119 设备资源关系表 `ads_yz_prod_res_inst_rel_final` | 090 终端装维成本；105/106 特性资料表；040/041 订单表 | 设备名称、设备类型、购买方式、机身号、数量等字段在设备资源表；同一 `serv_id` 可能一对多，默认保留设备明细 |
+| 号码清单补终端自注册信息 | 用户附件种子表；或先用 069 圈定号码 `acc_nbr` | 123 终端自注册清单 `summary_ods_day_szx.rpt_terminal_type_new` | 119 设备资源关系表；090 终端装维成本；105/106 特性资料表 | 终端自注册机型、终端制式、手机厂商、标准化机型、注册时间、IMSI/IMEI 等字段在终端自注册清单；一号一行默认按 `register_time desc, sys_time desc` 取最新 |
 | 客户实体映射 / 产权客户名称补编码 | 108 产权客户全量表 `dws_crm_cust.dws_customer` | 用户附件种子表 | 号码/服务事实表 | 用于按客户名称维护/更新客户信息、无编码时兜底补 `cust_number`；若需求是号码/服务明细并要客户名，优先用 069 或当前事实主表自带客户字段 |
 | 客户实体映射 / 产权客户 -> 直销客户信息 | 109 直销客户表 `zone_gz_yz.dws_yz_tb_mo_custgrp_cust_final` | 018 机构维表补机构名称；108 补产权客户编码 | 号码/服务事实表 | 用于签订/维护直销客户、通过产权客户找直销客户等客户实体关系；用 `cust_nbr` 补 `ccust_code/ccust_name` 及机构 ID；机构 ID 的业务含义看来源字段和需求语境，018 只负责 `org_id` 翻译 |
 | 名单制管控清单 / 不用 is_mdz 的名单制 | 122 名单制管控清单 `ads_yz_mo_ccust_mdz_final` | 已有直销客户编码可直接补；只有产权客户编码时先补 109 | 直接使用 069/033 的 `is_mdz` 代替管控清单 | 用户明确说“名单制用管控清单，不用 `is_mdz`”时，按 `cust_code/ccust_code` 补 `hk_flag/create_date`；这是一条客户标签补表规则，不改变号码/专线主表选择 |
