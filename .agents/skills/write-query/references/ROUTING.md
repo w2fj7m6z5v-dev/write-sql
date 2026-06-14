@@ -100,7 +100,7 @@ runtime: true
 |-------|-----------|------------|-----------------|------|
 | 销售品 / offer | 销售品 | 041 优惠订单表（动作）；014 优惠资料表（存量） | `prod_offer_id`，维表 `dws_offer.offer_id` | 销售品维表必加 `city_id=200` |
 | 销售品发展量 | 订购 + 销售品互换 | 041 优惠订单表 | `action_id IN (1292, 6200)`，排除撤单作废 | 不要选专项产品清单 |
-| 销售品在档 / 有没有套餐 | 销售品存量 | 014 优惠资料表 | `serv_id + par_month_id + prod_offer_code`；名称 `prod_offer_name` | 「有没有」≠ 041 订购动作 |
+| 销售品在档 / 有没有套餐 / 协议到期 | 销售品存量 | 014 优惠资料表；历史账期/协议期回溯用月表 `dwd_yz_rpt_comm_cm_msdisc_mon_final` | `serv_id + par_month_id + prod_offer_code/prod_offer_id`；名称 `prod_offer_name`；到期 `limit_date` | 「有没有」≠ 041 订购动作；协议销售品范围需来自配置表或用户确认 |
 | 销售品参数 / 折扣 / 赠金 / 统付金额 | 销售品参数值 | 014 锁在档 → 107 补 `param_value`（号码清单可先 069 补 `serv_id`） | - | 主表路径 014；补表步骤见 `FIELD_BACKFILL.md` **§销售品参数值（107）** |
 | 移动主套餐名称 / 主套餐名称 | 移动主套餐维度 | 主表已有名称则直接取；否则补 019 移动主套餐维表 | 069 `cdma_disc_type = 019.cdma_disc_id`，输出 `cdma_disc_desc` | 不要误走 020 销售品维表；销售品 / offer 名称才走 020 |
 | 设备名称 / 设备类型 / 购买方式 / 机身号 / 设备数量 | 设备资源信息 | 附件或 069 补 `serv_id` → 119 设备资源关系表 | `serv_id`；输出 `mkt_res_name/res_type/property_type_name/eqpt_sn/mkt_res_num` | 同一 `serv_id` 可能多设备；不要误选 090 终端装维成本或 105/106 特性表 |

@@ -45,7 +45,7 @@
 |010|降档原始清单|ads_yz_sunshou_acc_list|ads_yz_sunshou_acc_list|tables/010_降档原始清单.md|||-|-||
 |011|降档动作订单清单|ads_yz_sunshou_qudao|ads_yz_sunshou_qudao|tables/011_降档动作订单清单.md|||-|-||
 | 012 | 发展存量积分清单 | ads_yz_score_all_list | ads_yz_score_all_list | tables/012_发展存量积分清单.md | 积分类全量明细底表，含号码/服务/积分类型/客户/网格/积分字段 | par_month_id | 积分类全量明细、发展积分、存量积分，以及需要积分类型层级、号码、客户、网格、竣工时间、价值/激励积分及描述的取数 | 字段名相似但业务事实不在本表时不要选；明确专项指标/专项表口径时再看 007/081/082/091 |
-| 014 | 优惠资料表 | ads_yz_rpt_comm_cm_msdisc_final | ads_yz_rpt_comm_cm_msdisc_final | tables/014_优惠资料表.md |  | par_month_id | 销售品存量、在档、有没有某套餐 | 销售品订购/发展量动作用 041 |
+| 014 | 优惠资料表 | ads_yz_rpt_comm_cm_msdisc_final | ads_yz_rpt_comm_cm_msdisc_final；dwd_yz_rpt_comm_cm_msdisc_mon_final（月表/历史快照） | tables/014_优惠资料表.md | 销售品在档实例粒度 | par_month_id | 销售品存量、在档、有没有某套餐；历史账期/协议到期核查用月表 | 销售品订购/发展量动作用 041 |
 |015|字典表视图|dws_crm_cfguse.dws_attr_value|dws_crm_cfguse.dws_attr_value|tables/015_字典表视图.md|||-|-||
 |016|字典维表视图|dws_crm_cfguse.dws_attr_SPEC|dws_crm_cfguse.dws_attr_SPEC|tables/016_字典维表视图.md|||-|-||
 |017|产品维表视图|dws_crm_cfguse.dws_product|dws_crm_cfguse.dws_product|tables/017_产品维表视图.md|||-|-||

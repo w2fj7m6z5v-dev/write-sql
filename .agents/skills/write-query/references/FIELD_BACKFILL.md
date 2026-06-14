@@ -99,7 +99,7 @@ runtime: true
 | 步骤 | 表 | 作用 |
 |------|-----|------|
 | 0（可选） | 069 全业务资料表 | 附件仅给 `acc_nbr` 时补 `serv_id`；锁 `par_month_id` |
-| 1 | 014 优惠资料表 `ads_yz_rpt_comm_cm_msdisc_final` | 锁账期在档销售品：`serv_id` + `par_month_id` + `prod_offer_id`；可取 `limit_date` |
+| 1 | 014 优惠资料表 `ads_yz_rpt_comm_cm_msdisc_final`；历史账期/协议期回溯用月表 `dwd_yz_rpt_comm_cm_msdisc_mon_final` | 锁账期在档销售品：`serv_id` + `par_month_id` + `prod_offer_id`；可取 `open_date`、`limit_date` |
 | 2 | 107 销售品参数表 `summary_ods_day_city.rpt_comm_cm_msparam` | 补 `param_value` |
 
 **ROUTING 主表判断**：销售品参数类需求的事实主路径为 **014（先锁在档）**；107 仅作补表，**禁止**把 107 当主表。041 是动作表，不用于查在档参数。
