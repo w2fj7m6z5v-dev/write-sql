@@ -71,8 +71,8 @@
 |039|欠不列预警清单|zone_gz_yz.ads_ys_qblyj_daily|zone_gz_yz.ads_ys_qblyj_daily|tables/039_欠不列预警清单.md|||-|-||
 |040|全业务号码订单表|zone_gz_yz.dwm_yz_rpt_comm_ba_subs_final|zone_gz_yz.dwm_yz_rpt_comm_ba_subs_final|tables/040_全业务号码订单表.md|||-|-||
 | 041 | 优惠订单表 | zone_gz_yz.dwm_yz_rpt_comm_ba_msdisc_final | dwm_yz_rpt_comm_ba_msdisc_final；dwm_yz_rpt_comm_ba_msdisc_mon_final（月表/历史归档） | tables/041_优惠订单表.md | 订单粒度（subs_id 唯一） | par_month_id（月表） | 销售品发展量、订购、互换等订单动作；历史月份订单用月表 | 当前表只放当前套餐订单及历史未归档订单；查历史月份不要只扫当前表；销售品在档/存量用 014 |
-|042|号码协销表|zone_gz_yz.dwd_yz_cm_obj_xx_final|zone_gz_yz.dwd_yz_cm_obj_xx_final|tables/042_号码协销表.md|||-|-||
-|043|订单协销表|zone_gz_yz.dwd_yz_ba_obj_xx_final|zone_gz_yz.dwd_yz_ba_obj_xx_final|tables/043_订单协销表.md|||-|-||
+| 042 | 号码协销表 | zone_gz_yz.dwd_yz_cm_obj_xx_final | zone_gz_yz.dwd_yz_cm_obj_xx_final；zone_gz_yz.dwd_yz_cm_obj_xx_mon_final（月表） | tables/042_号码协销表.md | 服务粒度协销人信息 | par_month_id（月表） | 按 `serv_id` 回填第一协销人/第二协销人（第二发展人/第三发展人）；历史账期用月表，当前用日表 | 不要用于订单粒度协销；订单已有 `subs_id` 时优先看 043 |
+| 043 | 订单协销表 | zone_gz_yz.dwd_yz_ba_obj_xx_final | zone_gz_yz.dwd_yz_ba_obj_xx_final | tables/043_订单协销表.md | 订单粒度协销人信息；按订单项与发展人类型分行 | par_month_id | 按订单 `subs_id = order_item_id` 回填第一协销人/第二协销人；`dev_staff_type='2000'/'3000'` | 本表没有月表；不要用于只有 `serv_id`、无订单键的服务清单 |
 | 047 | 最终版划小收入 | dwm_srhx_serv_list_mon | dwm_srhx_serv_list_mon_final | tables/047_最终版划小收入.md | 服务/月收入明细，可按 `cust_nbr` 汇总到客户级 | par_month_id | 划小收入、客户清单基本面/产数（`fee_fm_new`/`fee_cs`）；编排见 `scenarios/SC-009` | 不要用 069 费用字段替代；标准指标口径见 097/metrics |
 | 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md | 服务/号码级科目收入明细 | month_id | 全量科目级收入、按 SR 科目/due_income_code 取税后收入 sum(fee_all)；最新月表 `dwm_srhx_src_income_list` 只放最新收入月份 | 字段名相似但业务事实不在本表时不要选；划小收入汇总用 047；历史月/多账期用 `_mon` |
 |049|欠费日清单|ads_ys_lst_qf_pushdata_daily_bss|ads_ys_lst_qf_pushdata_daily_bss|tables/049_欠费日清单.md|||-|-||
