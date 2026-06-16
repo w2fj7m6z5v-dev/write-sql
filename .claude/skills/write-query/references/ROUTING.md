@@ -104,7 +104,7 @@ runtime: true
 | 销售品在档 / 有没有套餐 / 协议到期 | 销售品存量 | 014 优惠资料表；历史账期/协议期回溯用月表 `dwd_yz_rpt_comm_cm_msdisc_mon_final` | `serv_id + par_month_id + prod_offer_code/prod_offer_id`；名称 `prod_offer_name`；到期 `limit_date` | 「有没有」≠ 041 订购动作；协议销售品范围需来自配置表或用户确认 |
 | 销售品参数 / 折扣 / 赠金 / 统付金额 | 销售品参数值 | 014 锁在档 → 107 补 `param_value`（号码清单可先 069 补 `serv_id`） | - | 主表路径 014；补表步骤见 `FIELD_BACKFILL.md` **§销售品参数值（107）** |
 | 移动主套餐名称 / 主套餐名称 | 移动主套餐维度 | 主表已有名称则直接取；否则补 019 移动主套餐维表 | 069 `cdma_disc_type = 019.cdma_disc_id`，输出 `cdma_disc_desc` | 不要误走 020 销售品维表；销售品 / offer 名称才走 020 |
-| 设备名称 / 设备类型 / 购买方式 / 机身号 / 设备数量 | 设备资源信息 | 附件或 069 补 `serv_id` → 119 设备资源关系表 | `serv_id`；输出 `mkt_res_name/res_type/property_type_name/eqpt_sn/mkt_res_num` | 同一 `serv_id` 可能多设备；不要误选 090 终端装维成本或 105/106 特性表 |
+| 设备名称 / 设备类型 / 购买方式 / 设备来源 / 机身号 / 设备数量 | 设备资源信息 | 附件或 069 补 `serv_id` → 119 设备资源关系表 | `serv_id`；输出 `mkt_res_name/res_type/property_type_name/eqpt_sn/mkt_res_num`；原始表 `property_type` 用字典 `4000000208` 翻译 | 同一 `serv_id` 可能多设备；默认优先 119 派生表，需要原始字段或历史时用 CRM 当前/历史原始表；不要误选 090 终端装维成本或 105/106 特性表 |
 | 终端自注册机型 / 终端制式 / 手机厂商 / IMEI / IMSI | 终端自注册信息 | 附件号码或 069 `acc_nbr` → 123 终端自注册清单 | `acc_nbr`；输出 `terminal_type/brand_type/factory/brand/register_time/imsi/imei1/imei2` | 与 119 设备资源不同；一号一行默认按 `register_time` 取最新 |
 | 新装 / 入网 | 新入网规模 | 069 全业务资料表 | `is_new_user=1`、`open_date`、`subs_id` | 宽带、移动、固话及其它产品入网量默认都走 069 |
 | 到达 / 在网 / 出账 | 存量状态 | 069 全业务资料表 | `is_cz`、`is_cancel_user`、`is_online_user` | 规模类口径；**用户说「状态」见下行** |
@@ -205,7 +205,7 @@ runtime: true
 | 优惠订单补销售品在档资料 | 041 优惠订单表 | 014 优惠资料表 | 直接把 014 当动作主表；`041.msinfo_id = 014.msinfo_id` | 041.`msinfo_id` 是 CRM 原始实例键；014.`msinfo_id` 已二次加工，默认用 `041.msinfo_id = 014.msobjgrp_id`，月表还要对齐 `par_month_id` |
 | 指定套餐实例下的其他号码 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 014 优惠资料表取 `msobjgrp_id`，再按同 `msobjgrp_id` 找其他 `serv_id/acc_nbr`；必要时回 069 判断号码类型 | 041 优惠订单表；按单个销售品编码硬写成 WiFi/IPTV 专项 | `msobjgrp_id` 是套餐实例键；需求方给的销售品编码只是定位入口，同套餐下要取什么号码由需求过滤 |
 | 销售品参数 / 折扣 / 赠金 / 统付金额 | 014 优惠资料表（先锁在档销售品） | 069 补 `serv_id`；107 补 `param_value` | 041 优惠订单表；107 直接当主表 | 三步补表见 `FIELD_BACKFILL.md` **§销售品参数值（107）** |
-| 号码 / 服务清单补设备资源字段 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 119 设备资源关系表 `ads_yz_prod_res_inst_rel_final` | 090 终端装维成本；105/106 特性资料表；040/041 订单表 | 设备名称、设备类型、购买方式、机身号、数量等字段在设备资源表；同一 `serv_id` 可能一对多，默认保留设备明细 |
+| 号码 / 服务清单补设备资源字段 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 119 设备资源关系表 `ads_yz_prod_res_inst_rel_final`；需要原始字段/历史时用 `dws_crm_cust.dws_prod_res_inst_rel/_his` | 090 终端装维成本；105/106 特性资料表；040/041 订单表 | 设备名称、设备类型、购买方式、机身号、数量等字段在设备资源表；同一 `serv_id` 可能一对多，默认保留设备明细；原始表购买方式按 `property_type -> dws_attr_value(attr_id=4000000208)` 翻译 |
 | 号码清单补终端自注册信息 | 用户附件种子表；或先用 069 圈定号码 `acc_nbr` | 123 终端自注册清单 `summary_ods_day_szx.rpt_terminal_type_new` | 119 设备资源关系表；090 终端装维成本；105/106 特性资料表 | 终端自注册机型、终端制式、手机厂商、标准化机型、注册时间、IMSI/IMEI 等字段在终端自注册清单；一号一行默认按 `register_time desc, sys_time desc` 取最新 |
 | 客户实体映射 / 产权客户名称补编码 | 108 产权客户全量表 `dws_crm_cust.dws_customer` | 用户附件种子表 | 号码/服务事实表 | 用于按客户名称维护/更新客户信息、无编码时兜底补 `cust_number`；若需求是号码/服务明细并要客户名，优先用 069 或当前事实主表自带客户字段 |
 | 客户清单补联系人信息 | 用户附件客户清单 | 126 客户联系人关系表；127 联系人信息表 | 049 欠费日清单联系人字段；108 产权客户全量表 | 客户清单有 `cust_id` 时先补 `contact_id`，再按 `PARTY_ID + contact_id` 补 `contact_name/home_phone/office_phone/mobile_phone/status_date`；默认 `LEFT JOIN` 保留客户清单，未命中联系人置空 |
