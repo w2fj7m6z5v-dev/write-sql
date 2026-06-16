@@ -131,6 +131,7 @@ runtime: true
 | 在网 / 在用 | 在网状态 | 069 | `is_cancel_user=0` / `is_online_user=1` | 不同口径定义不同 |
 | 出账 | 当月出账 | 069 | `is_cz=1`（当月） / `is_cz_last=1`（上月） | 月维度判断 |
 | 融合 | 融合套餐 | 069 | `rh_type_ykj` / `is_rh_ykj=1` / `rh_tc_id` / `rh_tc_value` | 严口径见 metrics |
+| 宽带销户数 / 销户口径 | 标准指标口径 | 069 全业务资料表 | `wlcj + jzf + fzj`；详见 `M-BASIC-BB-013` | 不要直接等同逻辑拆机；保留普通宽带及专线、快捷宽带剔除条件 |
 | 拆机（默认） | **逻辑拆机** | 069 全业务资料表（**月表**回溯时） | `is_cancel_user=1`；`hist_create_date` | **默认口径**；不一定有拆机订单；拆机标签仅拆机当月分区 |
 | 物理拆机 | 有拆机订单的物理拆机 | 069 / 086 主宽拆机挽留清单 | `is_wl_cancel_user=1`；`wl_cancel_subs_stat_date` | 需用户**特别声明**；物理拆机 ≠ 逻辑拆机 |
 | 产品规格属性 / 主产品特性 | 主产品规格特性值 | 105 特性资料表（**月表**取历史） | `serv_id` + `attr_id` + `attr_value1`；`par_corp_id='200'` | 历史快照用月表 `tb_pre_cm_attr_all_mon`；日表只在网；**非附属产品** |

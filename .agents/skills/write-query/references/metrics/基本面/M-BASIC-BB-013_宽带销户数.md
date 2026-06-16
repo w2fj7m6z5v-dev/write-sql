@@ -26,16 +26,29 @@ source_file: "宽带.md"
 
 ## 业务口径
 
-(未填写)
+宽带销户数来自 069 全业务资料表，限定普通宽带并剔除专线、城域网和快捷宽带主账号。
+
+销户 = 物理拆机（wlcj）+ 计转非（jzf）+ 非转计（fzj），其中非转计为负向抵减：
+
+- `fzj`（非转计）= `is_cz_last=0 and is_cancel_user=0 and is_new_user=0 and is_cz=1`，计 `-1`
+- `jzf`（计转非）= `is_cz_last=1 and is_cancel_user=0 and is_cz=0`，计 `1`
+- `wlcj`（物理拆机）= `is_cz_last=1 and is_wl_cancel_user=1`，计 `1`
 
 ## 技术口径（SQL）
 
 ```sql
-SELECT  sum(case when is_cz_last=0 and is_cancel_user=0 and is_new_user=0 and is_cz=1 then -1 else 1 end)
+SELECT
+  sum(case when is_cz_last=0 and is_cancel_user=0 and is_new_user=0 and is_cz=1 then -1 else 0 end) as fzj,  -- 非转计，负向抵减
+  sum(case when is_cz_last=1 and is_cancel_user=0 and is_cz=0 then 1 else 0 end) as jzf,  -- 计转非
+  sum(case when is_cz_last=1 and is_wl_cancel_user=1 then 1 else 0 end) as wlcj,  -- 物理拆机
+  sum(case when is_cz_last=0 and is_cancel_user=0 and is_new_user=0 and is_cz=1 then -1 else 0 end)
+  + sum(case when is_cz_last=1 and is_cancel_user=0 and is_cz=0 then 1 else 0 end)
+  + sum(case when is_cz_last=1 and is_wl_cancel_user=1 then 1 else 0 end) as xh_cnt
 FROM view_ads_yz_tb_comm_cm_all_final
 WHERE  par_month_id =202603
 AND ((is_cz_last=0 AND is_cancel_user=0 AND is_new_user=0 AND is_cz=1)--非转计
-OR (is_cz_last=1 AND (is_wl_cancel_user=1 or is_cz=0)))--物理拆机、计转非
+OR (is_cz_last=1 AND is_cancel_user=0 AND is_cz=0)--计转非
+OR (is_cz_last=1 AND is_wl_cancel_user=1))--物理拆机
 AND prod_type=40 AND kd_desc='普通宽带'
 AND  prod_id NOT IN (48,52,57,600039000,1100)  --剔除专线，城域网
 AND COALESCE(kd_prod_offer_id,'-1')  NOT IN ('500046067' ) --剔除快捷宽带主账号
