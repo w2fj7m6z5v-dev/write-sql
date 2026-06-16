@@ -135,6 +135,7 @@ runtime: true
 | 拆机（默认） | **逻辑拆机** | 069 全业务资料表（**月表**回溯时） | `is_cancel_user=1`；`hist_create_date` | **默认口径**；不一定有拆机订单；拆机标签仅拆机当月分区 |
 | 物理拆机 | 有拆机订单的物理拆机 | 069 / 086 主宽拆机挽留清单 | `is_wl_cancel_user=1`；`wl_cancel_subs_stat_date` | 需用户**特别声明**；物理拆机 ≠ 逻辑拆机 |
 | 产品规格属性 / 主产品特性 | 主产品规格特性值 | 105 特性资料表（**月表**取历史） | `serv_id` + `attr_id` + `attr_value1`；`par_corp_id='200'` | 历史快照用月表 `tb_pre_cm_attr_all_mon`；日表只在网；**非附属产品** |
+| 欠费停机属性 / 欠停时间 / 首次欠停时间 | 服务产品规格属性时间 | 105 特性资料表 | `char_class='04' AND attr_id=98`；`serv_id` + `create_date`；默认取最早 `create_date` | 不是欠费金额/欠费余额；不要误选 049 欠费日清单 |
 | IMSI / 号码 IMSI | 号码产品规格属性 | 069 → 105 | `attr_id='200000103'` | 勿走 114 国漫表；专项见 **§专项场景索引**（SC-005） |
 | 附属产品属性 / 附属产品特性 | 附属产品特性值 | 106 附属产品资料表（**月表**取历史） | `serv_id` + `attr_id` + `attr_value1`；`sub_prod_id` 可带出；`par_corp_id='200'` | 月表 `rpt_comm_cm_subserv_mon`；日表 `rpt_comm_cm_subserv` 只在网 |
 | 竣工 | 订单状态=竣工 | 任意带 `subs_stat` 的订单表 | `subs_stat='301200'` | **默认作 `is_jg` 标记列输出，不进 WHERE**；过滤竣工与否要看用户意图 |
