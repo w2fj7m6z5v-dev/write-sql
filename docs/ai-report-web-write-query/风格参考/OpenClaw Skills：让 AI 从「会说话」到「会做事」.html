@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Skills：让 AI 从「会说话」到「会做事」</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca', 300: '#fca5a5',
+                            400: '#f87171', 500: '#ef4444', 600: '#e11d48', /* 沿用高亮红 */ 700: '#be123c',
+                            800: '#9f1239', 900: '#881337',
+                        }
+                    },
+                    fontFamily: { 
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out', 
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { transform: 'translateY(30px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text { background: linear-gradient(135deg, #e11d48 0%, #f87171 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(225, 29, 72, 0.15); border-color: rgba(225, 29, 72, 0.3); }
+        .code-block { background: #fef2f2; border-left: 3px solid #e11d48; }
+        .section-fade { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
+        .section-fade.visible { opacity: 1; transform: translateY(0); }
+        
+        /* 终端代码框美化 */
+        .mac-window { background: #0f172a; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .mac-header { background: #1e293b; padding: 0.75rem 1rem; display: flex; gap: 0.5rem; align-items: center; }
+        .mac-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .mac-body { padding: 1.5rem; color: #e2e8f0; font-family: ui-monospace, monospace; font-size: 0.9rem; overflow-x: auto; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+    
+    <!-- 右侧滚动导航点 -->
+    <nav class="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3">
+        <a href="#hero" class="w-3 h-3 rounded-full bg-brand-600 scale-125 nav-dot" data-section="hero"></a>
+        <a href="#what" class="w-3 h-3 rounded-full bg-slate-300 hover:bg-brand-600 transition-colors nav-dot" data-section="what"></a>
+        <a href="#structure" class="w-3 h-3 rounded-full bg-slate-300 hover:bg-brand-600 transition-colors nav-dot" data-section="structure"></a>
+        <a href="#find" class="w-3 h-3 rounded-full bg-slate-300 hover:bg-brand-600 transition-colors nav-dot" data-section="find"></a>
+        <a href="#optimize" class="w-3 h-3 rounded-full bg-slate-300 hover:bg-brand-600 transition-colors nav-dot" data-section="optimize"></a>
+        <a href="#create" class="w-3 h-3 rounded-full bg-slate-300 hover:bg-brand-600 transition-colors nav-dot" data-section="create"></a>
+        <a href="#summary" class="w-3 h-3 rounded-full bg-slate-300 hover:bg-brand-600 transition-colors nav-dot" data-section="summary"></a>
+        <a href="#demo" class="w-3 h-3 rounded-full bg-slate-300 hover:bg-brand-600 transition-colors nav-dot" data-section="demo"></a>
+    </nav>
+
+    <!-- 1. 封面 Hero -->
+    <section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden section-fade visible">
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-brand-50 opacity-50"></div>
+        <div class="absolute top-20 left-10 w-72 h-72 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-brand-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow" style="animation-delay: 1s;"></div>
+        
+        <div class="container mx-auto px-6 relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-200 rounded-full text-brand-700 text-sm font-medium mb-8 animate-fade-in">
+                <i class="fas fa-magic"></i><span>技能生态介绍与开发实践</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight animate-slide-up">
+                <span class="gradient-text font-black">OpenClaw Skills</span><br>
+                <span class="text-slate-800 text-4xl md:text-6xl mt-4 block">让 AI 从「会说话」到「会做事」</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-500 mb-12 max-w-3xl mx-auto animate-slide-up font-medium" style="animation-delay: 0.2s;">
+                把重复的工作流程，封装成一句话就能调用的标准化能力
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 animate-slide-up" style="animation-delay: 0.4s;">
+                <a href="#what" class="px-8 py-4 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition-all hover:shadow-lg hover:shadow-brand-200">了解 Skills</a>
+                <a href="#demo" class="px-8 py-4 bg-white text-brand-600 border-2 border-brand-200 rounded-xl font-semibold hover:border-brand-400 hover:bg-brand-50 transition-all">现场演示</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. 什么是 Skill -->
+    <section id="what" class="py-24 bg-white section-fade">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-brand-600 font-semibold tracking-wider text-sm uppercase">Concept</span>
+                    <h2 class="text-4xl font-bold text-slate-800 mt-2 mb-4">什么是 Skill？</h2>
+                    <p class="text-slate-600 text-lg">Skill = AI 的「专业工具包」</p>
+                    <div class="w-20 h-1 bg-brand-500 mx-auto rounded-full mt-4"></div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-slate-50 p-8 rounded-2xl shadow-sm border border-slate-200 hover-lift">
+                        <div class="w-14 h-14 bg-slate-200 rounded-xl flex items-center justify-center mb-6"><i class="fas fa-times-circle text-slate-500 text-2xl"></i></div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-3">没有 Skill</h3>
+                        <p class="text-slate-600 leading-relaxed mb-4">以 <span class="font-semibold text-slate-800">Excel 转 Markdown</span> 为例：</p>
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 text-sm text-slate-500">
+                            每次都需要写代码脚本、手动调整格式，沟通与执行成本极高。
+                        </div>
+                    </div>
+                    <div class="bg-brand-50 p-8 rounded-2xl shadow-sm border border-brand-200 hover-lift relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 text-brand-100 opacity-50"><i class="fas fa-check-circle text-9xl"></i></div>
+                        <div class="relative z-10">
+                            <div class="w-14 h-14 bg-brand-200 rounded-xl flex items-center justify-center mb-6"><i class="fas fa-check-circle text-brand-600 text-2xl"></i></div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-3">有 Skill</h3>
+                            <p class="text-slate-600 leading-relaxed mb-4">以 <span class="font-semibold text-brand-700">Excel 转 Markdown</span> 为例：</p>
+                            <div class="bg-white p-4 rounded-lg border border-brand-200 text-brand-700 font-bold shadow-sm">
+                                <i class="fas fa-comment-dots mr-2 text-brand-400"></i>一句话：「把表格转成 Markdown」
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="inline-block bg-white px-8 py-4 rounded-full border border-slate-200 shadow-sm text-lg font-medium text-slate-700">
+                        <strong class="text-brand-600 mr-2">一句话：</strong>Skill 让 AI 从「能干」变成「干得又快又稳」。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. 核心结构 -->
+    <section id="structure" class="py-24 bg-slate-50 section-fade">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-brand-600 font-semibold tracking-wider text-sm uppercase">Architecture</span>
+                    <h2 class="text-4xl font-bold text-slate-800 mt-2 mb-4">Skill 的核心结构</h2>
+                    <p class="text-slate-600 text-lg">一个文件夹，四个组成部分</p>
+                    <div class="w-20 h-1 bg-brand-500 mx-auto rounded-full mt-4"></div>
+                </div>
+                
+                <div class="mac-window hover-lift mb-8">
+                    <div class="mac-header">
+                        <div class="mac-dot" style="background: #ff5f56;"></div>
+                        <div class="mac-dot" style="background: #ffbd2e;"></div>
+                        <div class="mac-dot" style="background: #27c93f;"></div>
+                        <span class="text-slate-400 text-xs ml-2 font-sans">my-skill / 目录结构</span>
+                    </div>
+                    <!-- 这里加上了 whitespace-pre 和 overflow-x-auto 样式来保持树状结构的排版 -->
+                    <div class="mac-body leading-loose whitespace-pre overflow-x-auto">my-skill/
+├── <span class="text-brand-400 font-bold">SKILL.md</span>          <span class="text-slate-400">← 核心（必需）：元数据 + 指令</span>
+├── references/       <span class="text-slate-400">← 知识库/规程（可选）</span>
+├── assets/           <span class="text-slate-400">← 模板/静态资源（可选）</span>
+└── scripts/          <span class="text-slate-400">← 可执行脚本（可选）</span></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
+                    <div class="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center flex-shrink-0"><i class="fas fa-key text-brand-600 text-xl"></i></div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-lg mb-1">关键点</h4>
+                        <p class="text-slate-600">只需一个 <code class="bg-slate-100 text-brand-600 px-2 py-1 rounded text-sm font-mono border border-slate-200">SKILL.md</code> 文件，即可创建可用 Skill。极致轻量，极简封装。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. 查找 Skills -->
+    <section id="find" class="py-24 bg-white section-fade">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-brand-600 font-semibold tracking-wider text-sm uppercase">Discover</span>
+                    <h2 class="text-4xl font-bold text-slate-800 mt-2 mb-4">如何查找 Skills？</h2>
+                    <p class="text-slate-600 text-lg">从「人找工具」进化到「AI 找工具」</p>
+                    <div class="w-20 h-1 bg-brand-500 mx-auto rounded-full mt-4"></div>
+                </div>
+
+                <!-- 核心方式 -->
+                <div class="bg-brand-600 rounded-3xl p-1 md:p-2 mb-8 shadow-xl hover-lift">
+                    <div class="bg-white rounded-2xl p-8 md:p-10 h-full relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-brand-600 text-white text-xs font-bold px-4 py-2 rounded-bl-xl z-10">核心推荐</div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                            <i class="fas fa-search text-brand-600"></i> Find-Skills
+                        </h3>
+                        <p class="text-slate-600 mb-6">当你<strong>知道做什么，但不知道用什么 Skill</strong> 时，直接与 AI 对话：</p>
+                        
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6 relative">
+                            <!-- 对话气泡 -->
+                            <div class="flex justify-end mb-4">
+                                <div class="bg-brand-600 text-white p-4 rounded-2xl rounded-tr-sm shadow-md text-sm md:text-base">
+                                    「帮我用 find-skills 找一个能把 Excel 转成 Markdown 的技能」
+                                </div>
+                            </div>
+                            <div class="flex justify-start">
+                                <div class="bg-white p-4 md:p-5 rounded-2xl rounded-tl-sm border border-slate-200 shadow-sm w-full max-w-[95%]">
+                                    <p class="text-slate-700 font-medium mb-3 text-sm">为您找到以下相关技能，匹配度最高的是：</p>
+                                    <div class="bg-slate-50 border border-slate-100 rounded-lg p-3 mb-3 shadow-inner">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="font-bold text-brand-600 text-sm">excel2md <span class="text-xs text-slate-400 font-normal ml-1">v1.2.0</span></span>
+                                            <span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">最佳匹配</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500">Excel 表格转 Markdown，支持多 Sheet 解析。</p>
+                                    </div>
+                                    <p class="text-slate-700 font-medium text-sm">推荐安装 <strong class="text-brand-700">excel2md</strong>，是否立即安装？</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 辅助方式 -->
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover-lift flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4"><i class="fas fa-globe text-slate-600"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">ClawHub 官网</h4>
+                        <p class="text-slate-500 text-sm">浏览器访问官网，支持按分类浏览与横向对比</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover-lift flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4"><i class="fas fa-terminal text-slate-600"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Skills CLI</h4>
+                        <p class="text-slate-500 text-sm"><code>npx skills find [词]</code><br>终端快速精确搜索</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover-lift flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4"><i class="fab fa-github text-slate-600 text-lg"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">GitHub</h4>
+                        <p class="text-slate-500 text-sm">直接 <code>git clone</code><br>适合开发者进行源码定制</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. 迭代优化 -->
+    <section id="optimize" class="py-24 bg-slate-50 section-fade">
+        <div class="container mx-auto px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-brand-600 font-semibold tracking-wider text-sm uppercase">Evolution</span>
+                    <h2 class="text-4xl font-bold text-slate-800 mt-2 mb-4">Skill 的迭代优化</h2>
+                    <p class="text-slate-600 text-lg">已有 Skill 不满意？让 AI 直接帮你改。</p>
+                    <div class="w-20 h-1 bg-brand-500 mx-auto rounded-full mt-4"></div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm mb-10">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-brand-100 text-brand-600 rounded-lg flex items-center justify-center font-bold">案例</div>
+                        <h3 class="text-xl font-bold text-slate-800">优化「Excel 转 Markdown」输出格式</h3>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-8 items-stretch mb-10">
+                        <!-- Before -->
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col relative">
+                            <span class="absolute top-4 right-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Before</span>
+                            <h4 class="text-slate-700 font-bold mb-4 flex items-center gap-2"><i class="fas fa-table text-slate-400"></i> 原始输出 (传统表格)</h4>
+                            <div class="code-block p-4 rounded-lg font-mono text-xs text-slate-600 flex-grow bg-white border border-slate-200 whitespace-pre-wrap leading-relaxed">
+| 日期 | 驻点人员 | 县分 |
+|:---|:---|:---|
+| 25/7/1 | 黄娟娟 | 荔湾 |
+                            </div>
+                            <div class="mt-4 text-sm text-brand-600 flex items-start gap-2">
+                                <i class="fas fa-times-circle mt-0.5"></i>
+                                <p><strong>问题：</strong>表格形式不利于知识库大模型 (RAG) 的语义检索和标签化管理。</p>
+                            </div>
+                        </div>
+
+                        <!-- After -->
+                        <div class="bg-brand-50 p-6 rounded-2xl border border-brand-200 flex flex-col relative shadow-[0_0_30px_rgba(225,29,72,0.05)]">
+                            <span class="absolute top-4 right-4 text-xs font-bold text-brand-600 uppercase tracking-wider bg-brand-100 px-2 py-1 rounded">After (期望)</span>
+                            <h4 class="text-brand-800 font-bold mb-4 flex items-center gap-2"><i class="fas fa-file-code text-brand-500"></i> Obsidian/RAG 风格</h4>
+                            <div class="bg-white p-4 rounded-lg font-mono text-xs text-brand-900 flex-grow border border-brand-200 shadow-sm overflow-x-auto whitespace-pre-wrap leading-relaxed">
+---
+id: 007
+tags: [#人员/黄娟娟, #县分/荔湾]
+---
+
+# Q: 客编没业务怎么查？
+
+### 📋 基础元数据
+- **驻点人员**: 黄娟娟
+                            </div>
+                            <div class="mt-4 text-sm text-emerald-600 flex items-start gap-2">
+                                <i class="fas fa-check-circle mt-0.5"></i>
+                                <p><strong>目标：</strong>每条独立成块，带 YAML 标签，完美适配知识库归档。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 迭代对话 -->
+                    <div class="border-t border-slate-100 pt-8">
+                        <h4 class="font-bold text-slate-800 mb-6">如何用自然语言完成改造？</h4>
+                        <div class="space-y-4">
+                            <div class="flex gap-4 items-start">
+                                <div class="w-16 text-xs font-bold text-slate-400 mt-3 text-right">第 2 轮</div>
+                                <div class="bg-white border border-slate-200 p-3 rounded-xl rounded-tl-sm shadow-sm flex-grow text-sm text-slate-700">
+                                    「把 Excel 转成适合 RAG 识别的 Markdown 格式，展示两条案例数据给我确认结构」
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start">
+                                <div class="w-16 text-xs font-bold text-brand-600 mt-3 text-right">第 3 轮</div>
+                                <div class="bg-brand-600 text-white border border-brand-700 p-4 rounded-xl rounded-tl-sm shadow-md flex-grow text-sm font-medium leading-relaxed">
+                                    「这个效果不是我想要的。我要每条独立成块，带 YAML 标签，适配知识库的检索。改完之后，请同样输出两条案例给我确认。」
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-start">
+                                <div class="w-16 text-xs font-bold text-slate-400 mt-3 text-right">第 4 轮</div>
+                                <div class="bg-white border border-slate-200 p-3 rounded-xl rounded-tl-sm shadow-sm flex-grow text-sm text-slate-700">
+                                    「把这次迭代的改进<strong class="text-brand-600">固化</strong>到这个 Skill」
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. 创建方式 (时间线) -->
+    <section id="create" class="py-24 bg-white section-fade">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-brand-600 font-semibold tracking-wider text-sm uppercase">Implementation</span>
+                    <h2 class="text-4xl font-bold text-slate-800 mt-2 mb-4">如何创建 Skill？</h2>
+                    <p class="text-slate-600 text-lg">形成完整闭环的三种方式</p>
+                    <div class="w-20 h-1 bg-brand-500 mx-auto rounded-full mt-4"></div>
+                </div>
+
+                <div class="relative mb-20">
+                    <div class="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-600 to-brand-300 rounded-full hidden md:block"></div>
+                    <div class="space-y-8">
+                        <!-- 方式一 -->
+                        <div class="relative flex flex-col md:flex-row gap-6 md:items-start group hover-lift">
+                            <div class="flex-shrink-0 w-16 h-16 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg shadow-brand-200 z-10">1</div>
+                            <div class="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-brand-200 md:ml-4 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 bg-brand-50 text-brand-600 text-xs font-bold px-3 py-1 rounded-bl-lg border-b border-l border-brand-100">推荐</div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">对话式引导创建</h3>
+                                <p class="text-brand-600 font-medium text-sm mb-4">场景：有需求但无从下手（如上述 Excel 归档）</p>
+                                <p class="text-slate-600 text-sm mb-4">
+                                    <strong>优势：零代码起步，边聊边建，按需定制。</strong><br>
+                                    直接对 AI 提出需求，通过 4 轮对话，AI 自动生成配置和脚手架。
+                                </p>
+
+                                <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">完整操作流程</h4>
+                                    <ul class="space-y-4">
+                                        <li class="flex items-start gap-3">
+                                            <div class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-bold text-slate-500 shadow-sm shrink-0">第 1 轮</div>
+                                            <div>
+                                                <div class="text-sm font-medium text-slate-700 leading-relaxed">「利用 Find-Skills 查找 Excel 转 Markdown 的技能并安装」</div>
+                                                <div class="text-xs text-brand-600 mt-1.5 font-bold"><i class="fas fa-arrow-right mr-1 opacity-70"></i> Find-Skills 搜索并安装</div>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-3">
+                                            <div class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-bold text-slate-500 shadow-sm shrink-0">第 2 轮</div>
+                                            <div>
+                                                <div class="text-sm font-medium text-slate-700 leading-relaxed">「把 Excel 转成适合 RAG 识别的 Markdown 格式，展示两条案例数据给我确认结构」</div>
+                                                <div class="text-xs text-brand-600 mt-1.5 font-bold"><i class="fas fa-arrow-right mr-1 opacity-70"></i> 输出 2 条样例记录（表格格式）</div>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-3">
+                                            <div class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-bold text-brand-600 shadow-sm shrink-0 border-brand-200 bg-brand-50">第 3 轮</div>
+                                            <div>
+                                                <div class="text-sm font-medium text-slate-700 leading-relaxed bg-white border border-slate-200 p-2 rounded shadow-sm">
+                                                    「这个效果不是我想要的。我要每条独立成块，带 YAML 标签，适配知识库的检索。改完之后，请同样输出两条案例给我确认。」
+                                                </div>
+                                                <div class="text-xs text-brand-600 mt-2 font-bold"><i class="fas fa-arrow-right mr-1 opacity-70"></i> 调整为 YAML frontmatter + 章节划分，输出新样例确认</div>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-3">
+                                            <div class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-bold text-slate-500 shadow-sm shrink-0">第 4 轮</div>
+                                            <div>
+                                                <div class="text-sm font-medium text-slate-700 leading-relaxed">「把这次迭代的改进固化到这个 Skill」</div>
+                                                <div class="text-xs text-brand-600 mt-1.5 font-bold"><i class="fas fa-arrow-right mr-1 opacity-70"></i> 生成可复用的 SKILL.md，后续自动按优化后的格式输出</div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 方式二 -->
+                        <div class="relative flex flex-col md:flex-row gap-6 md:items-start hover-lift">
+                            <div class="flex-shrink-0 w-16 h-16 bg-slate-800 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg shadow-slate-200 z-10">2</div>
+                            <div class="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-slate-200 md:ml-4">
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">基于 GitHub 开源项目</h3>
+                                <p class="text-slate-500 font-medium text-sm mb-4">场景：借力成熟开源工具，快速封装视频下载能力</p>
+                                <p class="text-slate-600 text-sm mb-4">
+                                    <strong>优势：5 分钟将成熟工具变为 AI 技能，复用开源生态。</strong>
+                                </p>
+
+                                <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">操作流程</h4>
+                                    <ul class="space-y-4">
+                                        <li class="flex items-start gap-3">
+                                            <div class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-bold text-slate-500 shadow-sm shrink-0">Step 1</div>
+                                            <div>
+                                                <div class="text-sm font-medium text-slate-700 leading-relaxed">「帮我找一个 GitHub 上的视频下载开源项目」</div>
+                                                <div class="text-xs text-slate-500 mt-1.5 font-bold"><i class="fas fa-arrow-right mr-1 opacity-70"></i> OpenClaw 返回 yt-dlp、you-get 等推荐</div>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-3">
+                                            <div class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-bold text-slate-500 shadow-sm shrink-0">Step 2</div>
+                                            <div>
+                                                <div class="text-sm font-medium text-slate-700 leading-relaxed">「基于这个链接创建 Skill：https://github.com/yt-dlp/yt-dlp」</div>
+                                                <div class="text-xs text-slate-500 mt-1.5 font-bold"><i class="fas fa-arrow-right mr-1 opacity-70"></i> 自动克隆项目、分析功能和使用方式、生成 triggers 并封装调用</div>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start gap-3">
+                                            <div class="bg-white border border-slate-200 rounded px-2 py-0.5 text-xs font-bold text-slate-500 shadow-sm shrink-0">Step 3</div>
+                                            <div>
+                                                <div class="text-sm font-medium text-slate-700 leading-relaxed">直接使用：「下载这个视频 https://bilibili.com/xxx」</div>
+                                                <div class="text-xs text-slate-500 mt-1.5 font-bold"><i class="fas fa-arrow-right mr-1 opacity-70"></i> Skill 自动调用 yt-dlp 完成下载</div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 方式三 -->
+                        <div class="relative flex flex-col md:flex-row gap-6 md:items-start hover-lift">
+                            <div class="flex-shrink-0 w-16 h-16 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center font-bold text-xl shadow-md z-10">3</div>
+                            <div class="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-slate-200 md:ml-4">
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">手工创建</h3>
+                                <p class="text-slate-500 font-medium text-sm mb-4">场景：高级开发者，需要精细控制与深度定制</p>
+                                <p class="text-slate-600 text-sm mb-4">
+                                    <strong>优势：完全可控。</strong><br>
+                                    手动创建目录及 <code>SKILL.md</code>，编写元数据、触发器、引用工具和脚本代码。
+                                </p>
+                                
+                                <div class="bg-[#0f172a] p-4 rounded-xl shadow-inner font-mono text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+<span class="text-slate-500"># 创建目录</span>
+mkdir -p ~/.openclaw/workspace/skills/my-skill
+
+<span class="text-slate-500"># 编写 SKILL.md</span>
+---
+<span class="text-brand-400">name</span>: excel2md-pro
+<span class="text-brand-400">version</span>: 1.0.0
+<span class="text-brand-400">description</span>: Excel 转 Markdown 高级版
+<span class="text-brand-400">triggers</span>: ["excel 转 md", "表格转换"]
+<span class="text-brand-400">tools</span>: ["file_read", "code_interpreter"]
+---
+<span class="text-slate-500"># 测试验证</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 闭环图示 -->
+                <div class="bg-slate-900 rounded-3xl p-8 md:p-12 text-center text-white shadow-xl relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-brand-900/40 via-slate-900 to-slate-900 opacity-50"></div>
+                    <!-- Background accents -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-brand-600 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
+                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-600 rounded-full mix-blend-screen filter blur-[100px] opacity-10"></div>
+                    
+                    <div class="relative z-10 max-w-3xl mx-auto">
+                        <h4 class="text-brand-400 font-bold tracking-widest text-sm uppercase mb-10 text-center">Skill 完整生命周期闭环</h4>
+                        
+                        <div class="flex flex-col items-center w-full font-sans text-sm">
+                            
+                            <!-- 开始 -->
+                            <div class="px-6 py-2 bg-slate-800 border border-slate-700 rounded-full text-slate-300 font-medium shadow-sm z-10 hover:bg-slate-700 transition-colors cursor-default">开始</div>
+                            <div class="w-0.5 h-6 bg-slate-600"></div>
+                            
+                            <!-- 查找 -->
+                            <div class="px-8 py-3 bg-brand-600 text-white rounded-xl font-bold shadow-lg shadow-brand-900/50 border border-brand-500 z-10 relative hover:-translate-y-1 transition-transform cursor-default">
+                                <i class="fas fa-search mr-2"></i>Find-Skills 查找
+                            </div>
+                            <div class="w-0.5 h-8 bg-slate-600 relative"></div>
+
+                            <!-- 水平分叉线 -->
+                            <div class="w-[260px] md:w-[420px] relative">
+                                <div class="w-full h-0.5 bg-slate-600"></div>
+                                <div class="absolute top-0 left-0 w-0.5 h-6 bg-slate-600"></div>
+                                <div class="absolute top-0 right-0 w-0.5 h-6 bg-slate-600"></div>
+                                
+                                <div class="absolute -top-3 left-4 text-emerald-400 bg-slate-900 px-2 font-bold text-xs"><i class="fas fa-check"></i> 找到</div>
+                                <div class="absolute -top-3 right-2 text-brand-400 bg-slate-900 px-2 font-bold text-xs"><i class="fas fa-times"></i> 找不到</div>
+                            </div>
+
+                            <!-- 左右节点容器 -->
+                            <div class="flex justify-between w-[276px] md:w-[436px] mt-6">
+                                
+                                <!-- 左分支 -->
+                                <div class="flex flex-col items-center w-[120px] md:w-40 relative">
+                                    <div class="w-full py-3 bg-slate-800 border border-slate-600 rounded-xl text-white text-center font-medium shadow-sm z-10 hover:border-emerald-500/50 transition-colors cursor-default">试用</div>
+                                    <div class="w-0.5 h-6 bg-slate-600"></div>
+                                    <div class="w-full py-2 bg-slate-900 border border-brand-500/50 rounded-lg text-brand-300 text-center shadow-sm z-10 text-xs font-bold">满意？</div>
+                                    <div class="w-0.5 h-6 bg-slate-600 relative"></div>
+                                    
+                                    <div class="w-full relative">
+                                        <div class="w-full h-0.5 bg-slate-600"></div>
+                                        <div class="absolute top-0 left-2 w-0.5 h-6 bg-slate-600"></div>
+                                        <div class="absolute top-0 right-2 w-0.5 h-6 bg-slate-600"></div>
+                                        <div class="absolute -top-3 left-3 text-emerald-400 bg-slate-900 px-1 font-bold text-[10px]">yes</div>
+                                        <div class="absolute -top-3 right-3 text-brand-400 bg-slate-900 px-1 font-bold text-[10px]">no</div>
+                                    </div>
+
+                                    <div class="flex justify-between w-[130px] md:w-[176px] mt-6 -ml-1 md:-ml-2">
+                                        <div class="w-[60px] md:w-20 py-2 bg-slate-800 border border-slate-600 rounded-lg text-emerald-300 font-medium text-center text-xs shadow-sm z-10 hover:bg-slate-700 transition-colors">使用</div>
+                                        <div class="w-[60px] md:w-20 py-2 bg-slate-800 border border-brand-500/50 rounded-lg text-brand-300 font-medium text-center text-xs shadow-sm z-10 leading-tight hover:bg-slate-700 transition-colors">迭代优化</div>
+                                    </div>
+                                </div>
+
+                                <!-- 右分支 -->
+                                <div class="flex flex-col items-center w-[120px] md:w-40 relative">
+                                    <div class="w-full py-3 bg-slate-800 border border-slate-600 rounded-xl text-white text-center font-medium shadow-sm z-10 hover:border-brand-500/50 transition-colors cursor-default">创建新 Skill</div>
+                                    <!-- 占位虚线，匹配左侧高度 -->
+                                    <div class="flex-grow min-h-[90px] w-0.5 border-l-2 border-dashed border-slate-600/50 mt-2 mb-2"></div>
+                                </div>
+                            </div>
+
+                            <!-- 底部汇聚 -->
+                            <div class="flex justify-center w-full mt-2 gap-10 md:gap-24 text-slate-500">
+                                <i class="fas fa-arrow-down animate-pulse"></i>
+                                <i class="fas fa-arrow-down animate-pulse" style="animation-delay: 0.2s;"></i>
+                                <i class="fas fa-arrow-down animate-pulse" style="animation-delay: 0.4s;"></i>
+                            </div>
+                            
+                            <div class="mt-4 px-8 md:px-12 py-4 bg-emerald-500/10 border border-emerald-500/50 rounded-2xl text-emerald-400 font-bold text-lg text-center shadow-[0_0_20px_rgba(16,185,129,0.15)] z-10 backdrop-blur-sm hover:bg-emerald-500/20 transition-colors cursor-default">
+                                <i class="fas fa-share-nodes mr-2"></i>复用分享
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. 总结 -->
+    <section id="summary" class="py-24 bg-brand-50 section-fade">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-brand-600 font-semibold tracking-wider text-sm uppercase">Value</span>
+                    <h2 class="text-4xl font-bold text-slate-800 mt-2 mb-4">核心价值</h2>
+                    <div class="w-20 h-1 bg-brand-500 mx-auto rounded-full mt-4"></div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 text-center mb-16">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-100 hover-lift">
+                        <div class="w-16 h-16 mx-auto bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                            <i class="fas fa-cubes text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-slate-800 mb-3">扩展性</h3>
+                        <p class="text-slate-600">AI 的「App 生态」，能力无限延伸，按需装配。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-100 hover-lift">
+                        <div class="w-16 h-16 mx-auto bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                            <i class="fas fa-robot text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-slate-800 mb-3">自主性</h3>
+                        <p class="text-slate-600">AI 自己找工具、改工具、造工具，高度自治。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-100 hover-lift">
+                        <div class="w-16 h-16 mx-auto bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                            <i class="fas fa-code-branch text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-slate-800 mb-3">可编程</h3>
+                        <p class="text-slate-600">人人可创建，对话即开发，成果可沉淀复用。</p>
+                    </div>
+                </div>
+
+                <div class="text-center bg-white py-12 px-6 rounded-3xl shadow-lg border-b-4 border-brand-600">
+                    <p class="text-2xl md:text-3xl font-bold text-slate-800 mb-8">
+                        Skill 让 OpenClaw 拥有<br class="md:hidden"><span class="text-brand-600 text-3xl md:text-4xl mx-2 mt-2 inline-block">「可扩展的、可复用的能力生态」</span>
+                    </p>
+                    <div class="inline-flex flex-wrap justify-center items-center gap-2 md:gap-4 bg-slate-900 text-white font-bold tracking-widest px-6 md:px-10 py-4 md:py-5 rounded-full shadow-2xl text-sm md:text-base">
+                        <span>找得到</span>
+                        <i class="fas fa-arrow-right text-slate-600 text-xs"></i>
+                        <span>用得好</span>
+                        <i class="fas fa-arrow-right text-slate-600 text-xs"></i>
+                        <span>改得了</span>
+                        <i class="fas fa-arrow-right text-slate-600 text-xs"></i>
+                        <span>造得出</span>
+                        <i class="fas fa-arrow-right text-brand-500 text-xs"></i>
+                        <span class="text-brand-400">大家用</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. 现场演示 -->
+    <section id="demo" class="py-24 bg-slate-800 section-fade">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="text-brand-400 font-semibold tracking-wider text-sm uppercase">Live Demo</span>
+                    <h2 class="text-4xl font-bold text-white mt-2 mb-4">现场实战演示</h2>
+                    <p class="text-slate-400 text-lg">从「找」到「改」再到「固化」，5 分钟完成全生命周期</p>
+                    <div class="w-20 h-1 bg-brand-500 mx-auto rounded-full mt-4"></div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 模块一 -->
+                    <div class="bg-slate-900 rounded-3xl p-8 border border-slate-700 hover-lift">
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="text-xl font-bold text-white">模块一：视频下载</h3>
+                            <span class="bg-brand-900 text-brand-300 text-xs px-3 py-1 rounded-full border border-brand-800">暖场演示</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-6 pb-6 border-b border-slate-800">目标：快速展示 OpenClaw 找工具、建工具、用工具的能力。</p>
+                        
+                        <ul class="space-y-6">
+                            <li class="flex gap-4 items-start">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+                                <div>
+                                    <p class="text-white text-sm mb-1">「帮我查找 GitHub 上视频下载的开源项目」</p>
+                                    <p class="text-brand-400 text-xs font-mono">→ OpenClaw 返回 yt-dlp 推荐</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4 items-start">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+                                <div>
+                                    <p class="text-white text-sm mb-1">「用 yt-dlp 创建一个视频下载技能」</p>
+                                    <p class="text-brand-400 text-xs font-mono">→ 自动克隆、封装成 Skill</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4 items-start">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
+                                <div>
+                                    <p class="text-white text-sm mb-1">「下载这个视频测试一下：https://b23.tv...」</p>
+                                    <p class="text-brand-400 text-xs font-mono">→ 自动调用完成下载</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 模块二 -->
+                    <div class="bg-slate-900 rounded-3xl p-8 border border-brand-800 shadow-[0_0_30px_rgba(225,29,72,0.1)] hover-lift">
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="text-xl font-bold text-white">模块二：Excel 转 RAG</h3>
+                            <span class="bg-brand-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">核心实战</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-6 pb-6 border-b border-slate-800">目标：展示查找 → 试用 → 迭代 → 确认 → 固化的完整流程。</p>
+                        
+                        <ul class="space-y-6">
+                            <li class="flex gap-4 items-start">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+                                <div>
+                                    <p class="text-white text-sm">「利用 Find-Skills 查找 Excel 转 Markdown 的技能并安装」</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4 items-start">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+                                <div>
+                                    <p class="text-white text-sm">「把 Excel 转成适合 RAG 的格式，展示两条案例」</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4 items-start">
+                                <div class="w-8 h-8 rounded-full bg-brand-800 text-brand-200 flex items-center justify-center font-bold text-sm flex-shrink-0 border border-brand-600">3</div>
+                                <div>
+                                    <span class="text-brand-400 text-xs font-bold mb-1 block">迭代 + 确认</span>
+                                    <p class="text-white text-sm leading-relaxed">「这个效果不是我想要的，我要每条独立成块，带 YAML 标签适配检索。改完之后，同样输出两条案例给我确认。」</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4 items-start">
+                                <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-[0_0_10px_rgba(225,29,72,0.5)]">4</div>
+                                <div>
+                                    <span class="text-brand-300 text-xs font-bold mb-1 block">固化标准</span>
+                                    <p class="text-white text-sm font-medium">「把这次迭代的改进固化到这个 Skill」</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 滚动监听脚本 -->
+    <script>
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    const id = entry.target.id;
+                    document.querySelectorAll('.nav-dot').forEach(dot => {
+                        dot.classList.remove('bg-brand-600', 'scale-125');
+                        dot.classList.add('bg-slate-300');
+                        if (dot.dataset.section === id) {
+                            dot.classList.remove('bg-slate-300');
+                            dot.classList.add('bg-brand-600', 'scale-125');
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.section-fade').forEach(section => observer.observe(section));
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+        
+        document.querySelectorAll('.nav-dot').forEach(dot => {
+            dot.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector('#' + this.dataset.section);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
