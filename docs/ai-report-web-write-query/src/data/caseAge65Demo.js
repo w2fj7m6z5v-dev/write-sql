@@ -6,6 +6,87 @@ export const caseAge65Demo = {
   userQuery:
     "请教下，能帮忙取一下近三个月，机主年龄大于等于65岁的所有订单不？",
 
+  assetDirectory: [
+    {
+      name: "SKILL.md",
+      kind: "entry",
+      title: "运行流程入口",
+      desc: "规定自然语言取数的基本节奏：先澄清需求，再做方案确认，最后生成 SQL。",
+    },
+    {
+      name: "METRIC_INDEX.md / metrics/",
+      kind: "metric",
+      title: "标准指标资产",
+      desc: "沉淀指标 ID、指标名称、技术口径和来源表，例如 [M-BASIC-BB-001] 主宽入网数。",
+    },
+    {
+      name: "TABLE_INDEX.md / tables/",
+      kind: "table",
+      title: "表资产与字段说明",
+      desc: "整理主表、补表、字段、分区、粒度和注意事项，支撑 AI 找对表、用对字段。",
+    },
+    {
+      name: "ROUTING.md",
+      kind: "route",
+      title: "主表路由规则",
+      desc: "把业务口语映射到取数路径，例如订单明细走 040，客户年龄补 069。",
+    },
+    {
+      name: "FIELD_BACKFILL.md",
+      kind: "route",
+      title: "字段补表规则",
+      desc: "当主表缺字段时，说明该补哪张表、用什么关联键、有哪些粒度风险。",
+    },
+    {
+      name: "RULES.md",
+      kind: "rule",
+      title: "SQL 审计规则",
+      desc: "约束时间口径、隐私字段、多步 CTAS、自检 SQL 等交付要求。",
+    },
+    {
+      name: "verified-cases/",
+      kind: "case",
+      title: "真实案例沉淀",
+      desc: "把已验证的典型场景沉淀下来，后续遇到相似需求可复用路径和口径。",
+    },
+  ],
+
+  generalFlow: [
+    {
+      title: "自然语言需求输入",
+      source: "业务原话",
+      desc: "接收业务人员的一句话需求，先识别业务对象、时间范围、输出结果和限制条件。",
+    },
+    {
+      title: "识别指标 / 维度 / 对象",
+      source: "METRIC_INDEX + 高频字段",
+      desc: "判断是否命中标准指标，或是否涉及常见维度、客户对象、订单对象等业务要素。",
+    },
+    {
+      title: "路由到主表",
+      source: "TABLE_INDEX + ROUTING",
+      desc: "根据业务术语确定主表和取数路径，避免 AI 直接猜表名、猜字段。",
+    },
+    {
+      title: "锁定字段与时间口径",
+      source: "tables/",
+      desc: "从表文档确认字段含义、分区、粒度和时间字段，明确统计窗口与业务时间。",
+    },
+    {
+      title: "缺字段时补表",
+      source: "FIELD_BACKFILL",
+      desc: "主表缺少年龄、组织、销售品、收入等字段时，按补表规则补齐并说明关联键。",
+    },
+    {
+      title: "生成 SQL 并自检交付",
+      source: "RULES.md",
+      desc: "输出可执行 SQL，同时附带数量、去重、月份分布等自检语句，方便验收。",
+    },
+  ],
+
+  summary:
+    "我们围绕 CDAP 自然语言取数开展能力建设，已沉淀指标口径、高频维度、表资产、主表路由、字段补表、审计规则和真实案例流程。当前能力可将业务口语需求转成可确认、可执行、可校验的 SQL，初步形成支撑人员取数经验复用的技能化雏形。",
+
   planRows: [
     { item: "查什么", value: "订单明细（号码订单 040 + 优惠订单 041）" },
     {
