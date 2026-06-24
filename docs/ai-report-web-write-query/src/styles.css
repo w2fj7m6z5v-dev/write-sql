@@ -517,7 +517,7 @@ a {
 .architecture-panel {
   display: grid;
   margin-top: 34px;
-  grid-template-columns: minmax(0, 1.34fr) minmax(300px, 0.66fr);
+  grid-template-columns: minmax(0, 1.46fr) minmax(285px, 0.54fr);
   overflow: hidden;
   border: 1px solid #334155;
   border-radius: 26px;
@@ -562,9 +562,9 @@ a {
 .architecture-tree-body {
   position: relative;
   min-height: 708px;
-  padding: 25px 26px 30px;
+  padding: 25px 24px 30px 30px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(200px, 0.45fr);
+  grid-template-columns: minmax(470px, 1fr) 34px minmax(168px, 0.34fr);
   gap: 0;
   align-items: start;
 }
@@ -572,9 +572,9 @@ a {
 .architecture-directory {
   position: relative;
   display: grid;
-  max-width: 520px;
-  gap: 7px;
+  gap: 6px;
   grid-column: 1;
+  margin-left: 22px;
 }
 
 .architecture-directory::before {
@@ -592,9 +592,25 @@ a {
   display: grid;
   align-items: baseline;
   min-height: 23px;
-  padding-left: calc(var(--directory-depth, 0) * 23px + 26px);
-  grid-template-columns: minmax(175px, max-content) minmax(120px, 1fr);
-  gap: 14px;
+  padding-left: calc(var(--directory-depth, 0) * 22px + 28px);
+  grid-template-columns: 14px minmax(165px, max-content);
+  gap: 8px;
+}
+
+.directory-row.directory-group-metrics {
+  --group-color: #a78bfa;
+}
+
+.directory-row.directory-group-tables {
+  --group-color: #60a5fa;
+}
+
+.directory-row.directory-group-rules {
+  --group-color: #4ade80;
+}
+
+.directory-row.directory-group-cases {
+  --group-color: #fbbf24;
 }
 
 .directory-depth-0 {
@@ -620,30 +636,60 @@ a {
 .directory-branch {
   position: absolute;
   top: 11px;
-  left: calc(var(--directory-depth, 0) * 23px + 15px);
+  left: calc(var(--directory-depth, 0) * 22px + 15px);
   width: 17px;
   height: 12px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.72);
   border-left: 1px solid rgba(148, 163, 184, 0.72);
 }
 
+.directory-index {
+  position: absolute;
+  top: -1px;
+  left: -48px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--group-color) 75%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--group-color) 9%, #0f172a);
+  color: var(--group-color);
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.directory-icon {
+  position: relative;
+  top: 2px;
+  color: color-mix(in srgb, var(--group-color, #94a3b8) 78%, #e2e8f0);
+  stroke-width: 2;
+}
+
 .directory-row code {
   color: #e2e8f0;
   font-family: ui-monospace, monospace;
-  font-size: 0.73rem;
+  font-size: 0.75rem;
   line-height: 1.45;
   white-space: nowrap;
 }
 
 .directory-row code.is-folder {
-  color: #fff;
+  color: color-mix(in srgb, var(--group-color, #fff) 55%, #fff);
   font-weight: 850;
 }
 
 .directory-note {
+  position: absolute;
+  left: 342px;
+  top: 2px;
+  width: 156px;
   color: #94a3b8;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   line-height: 1.45;
+  text-align: left;
+  white-space: nowrap;
 }
 
 /* Connector SVG */
@@ -657,46 +703,58 @@ a {
 }
 
 .connector-line {
-  stroke: rgba(251, 113, 133, 0.45);
-  stroke-width: 1.5;
-  stroke-dasharray: 6 4;
+  stroke: rgba(148, 163, 184, 0.48);
+  stroke-width: 1.25;
   fill: none;
   transition: stroke 0.3s ease;
 }
 
-.connector-line:hover {
-  stroke: rgba(251, 113, 133, 0.85);
-  stroke-dasharray: none;
+.connector-metrics {
+  stroke: rgba(167, 139, 250, 0.56);
+}
+
+.connector-tables {
+  stroke: rgba(96, 165, 250, 0.56);
+}
+
+.connector-rules {
+  stroke: rgba(74, 222, 128, 0.52);
+}
+
+.connector-cases {
+  stroke: rgba(251, 191, 36, 0.56);
 }
 
 /* Summary Cards */
 .directory-summary-cards {
-  display: grid;
-  gap: 14px;
+  position: relative;
   grid-column: 3;
   align-self: start;
-  padding-top: 10px;
+  min-height: 100%;
 }
 
 .summary-card {
-  position: relative;
-  padding: 16px 18px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(8px);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: absolute;
+  top: var(--card-top, 0);
+  left: 0;
+  right: 0;
+  padding: 13px 15px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--card-color) 36%, rgba(71, 85, 105, 0.72));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--card-color) 11%, transparent), transparent 70%),
+    rgba(15, 23, 42, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  transition: border-color 0.25s ease, background 0.25s ease;
 }
 
 .summary-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
   border-color: var(--card-color);
 }
 
 .summary-card strong {
   display: block;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--card-color);
   margin-bottom: 6px;
@@ -708,6 +766,25 @@ a {
   color: #94a3b8;
   line-height: 1.55;
   white-space: pre-line;
+}
+
+.summary-card .summary-card-badge {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 24px);
+  transform: translateY(-50%);
+  display: inline-grid;
+  min-width: 68px;
+  place-items: center;
+  padding: 5px 9px;
+  border: 1px solid rgba(167, 139, 250, 0.42);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.86);
+  color: #d8b4fe;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .summary-card-metrics {
@@ -1695,6 +1772,7 @@ a {
 
   .architecture-directory {
     max-width: 100%;
+    margin-left: 22px;
   }
 
   .directory-connector-svg {
@@ -1703,9 +1781,27 @@ a {
 
   .directory-summary-cards {
     grid-column: 1;
+    position: static;
     grid-template-columns: repeat(2, 1fr);
+    display: grid;
     gap: 10px;
     padding-top: 0;
+    min-height: auto;
+  }
+
+  .summary-card {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+  }
+
+  .summary-card .summary-card-badge {
+    position: static;
+    transform: none;
+    display: inline-grid;
+    width: fit-content;
+    margin-bottom: 8px;
   }
 }
 
@@ -1793,14 +1889,27 @@ a {
     overflow-x: auto;
   }
 
+  .architecture-directory {
+    margin-left: 34px;
+  }
+
   .architecture-directory::before {
     left: 15px;
   }
 
   .directory-row {
-    min-width: 520px;
-    grid-template-columns: minmax(165px, max-content) minmax(190px, 1fr);
+    min-width: 610px;
+    grid-template-columns: 14px minmax(165px, max-content);
     gap: 10px;
+  }
+
+  .directory-note {
+    left: 330px;
+    width: 190px;
+  }
+
+  .directory-index {
+    left: -42px;
   }
 
   .architecture-side {

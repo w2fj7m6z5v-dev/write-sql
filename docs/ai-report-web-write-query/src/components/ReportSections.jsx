@@ -8,6 +8,8 @@ import {
   Database,
   FileCheck2,
   FileCode2,
+  FileText,
+  Folder,
   GitBranch,
   Layers3,
   MessageSquareText,
@@ -47,38 +49,39 @@ const architectureDirectory = [
   { depth: 0, label: ".agents/skills/write-query/", type: "folder", note: "自然语言取数技能包" },
   { depth: 1, label: "SKILL.md", type: "file", note: "入口、路径判断与运行流程" },
   // ===== references/ 组 =====
-  { depth: 1, label: "references/", type: "folder", group: "metrics", note: "按需读取的知识资产" },
-  { depth: 2, label: "METRIC_INDEX.md", type: "file", note: "指标口径总入口" },
-  { depth: 2, label: "metrics/", type: "folder" },
-  { depth: 3, label: "基本面/", type: "folder" },
-  { depth: 4, label: "M-BASIC-BB-001 主宽入网数.md", type: "file" },
-  { depth: 4, label: "M-BASIC-BB-002 主宽入网积分.md", type: "file" },
-  { depth: 3, label: "专题/", type: "folder" },
-  { depth: 4, label: "M-TOPIC-BB-001 宽带T+n有效率.md", type: "file" },
+  { depth: 1, label: "references/", type: "folder", group: "metrics", groupIndex: "1", note: "按需读取的知识资产" },
+  { depth: 2, label: "METRIC_INDEX.md", type: "file", group: "metrics", note: "指标口径总入口" },
+  { depth: 2, label: "metrics/", type: "folder", group: "metrics", note: "指标体系" },
+  { depth: 3, label: "基本面/", type: "folder", group: "metrics", note: "基础指标" },
+  { depth: 4, label: "M-BASIC-BB-001 主宽入网数.md", type: "file", group: "metrics" },
+  { depth: 4, label: "M-BASIC-BB-002 主宽入网积分.md", type: "file", group: "metrics" },
+  { depth: 3, label: "专题/", type: "folder", group: "metrics", note: "专项指标" },
+  { depth: 4, label: "M-TOPIC-BB-001 宽带T+n有效率.md", type: "file", group: "metrics" },
   // ===== tables/ 组 =====
-  { depth: 1, label: "tables/", type: "folder", group: "tables", note: "表资产索引与文档" },
-  { depth: 2, label: "TABLE_INDEX.md", type: "file", note: "表资产索引" },
-  { depth: 2, label: "040_全业务号码订单表.md", type: "file", note: "订单类表" },
-  { depth: 2, label: "041_优惠订单表.md", type: "file", note: "订单类表" },
-  { depth: 2, label: "069_全业务资料表.md", type: "file", note: "客户资料类表" },
-  { depth: 2, label: "...", type: "file", note: "更多表文档" },
+  { depth: 1, label: "tables/", type: "folder", group: "tables", groupIndex: "2", note: "表资产索引与文档" },
+  { depth: 2, label: "TABLE_INDEX.md", type: "file", group: "tables", note: "表资产索引" },
+  { depth: 2, label: "040_全业务号码订单表.md", type: "file", group: "tables", note: "订单类表" },
+  { depth: 2, label: "041_优惠订单表.md", type: "file", group: "tables", note: "订单类表" },
+  { depth: 2, label: "069_全业务资料表.md", type: "file", group: "tables", note: "客户资料类表" },
+  { depth: 2, label: "...", type: "file", group: "tables", note: "更多表文档" },
   // ===== rules/ 组 =====
-  { depth: 1, label: "rules/", type: "folder", group: "rules", note: "规则与推理资源" },
-  { depth: 2, label: "ROUTING.md", type: "file", note: "主表路由" },
-  { depth: 2, label: "FIELD_BACKFILL.md", type: "file", note: "字段补表规则" },
-  { depth: 2, label: "RULES.md", type: "file", note: "生成规范与校验规则" },
+  { depth: 1, label: "rules/", type: "folder", group: "rules", groupIndex: "3", note: "规则与推理资源" },
+  { depth: 2, label: "ROUTING.md", type: "file", group: "rules", note: "主表路由" },
+  { depth: 2, label: "FIELD_BACKFILL.md", type: "file", group: "rules", note: "字段补表规则" },
+  { depth: 2, label: "RULES.md", type: "file", group: "rules", note: "生成规范与校验规则" },
   // ===== verified-cases/ 组 =====
-  { depth: 1, label: "verified-cases/", type: "folder", group: "cases", note: "真实案例沉淀" },
-  { depth: 2, label: "001_主宽入网统计.sql", type: "file", note: "主宽入网统计案例" },
-  { depth: 2, label: "002_留存分析.sql", type: "file", note: "留存分析案例" },
-  { depth: 2, label: "...", type: "file", note: "更多已验证案例" },
+  { depth: 1, label: "verified-cases/", type: "folder", group: "cases", groupIndex: "4", note: "真实案例沉淀" },
+  { depth: 2, label: "001_主宽入网统计.sql", type: "file", group: "cases", note: "主宽入网统计案例" },
+  { depth: 2, label: "002_留存分析.sql", type: "file", group: "cases", note: "留存分析案例" },
+  { depth: 2, label: "...", type: "file", group: "cases", note: "更多已验证案例" },
 ];
 
 const summaryCards = [
   {
     group: "metrics",
-    title: "指标口径库",
+    title: "指标库",
     desc: "统一指标定义\n300+ 标准指标",
+    badge: "数据字典",
     color: "#a78bfa",
   },
   {
@@ -226,19 +229,32 @@ export function ArchitectureSection() {
 
         const firstRow = groupRows[0].getBoundingClientRect();
         const lastRow = groupRows[groupRows.length - 1].getBoundingClientRect();
-        const cardRect = cardEl.getBoundingClientRect();
-
+        const topY = firstRow.top + 3 - svgRect.top;
+        const bottomY = lastRow.bottom - 3 - svgRect.top;
         const midY = (firstRow.top + lastRow.bottom) / 2 - svgRect.top;
+
+        cardEl.style.setProperty("--card-top", `${Math.max(8, midY - cardEl.offsetHeight / 2)}px`);
+
+        const cardRect = cardEl.getBoundingClientRect();
         const cardCenterY = cardRect.top + cardRect.height / 2 - svgRect.top;
 
-        const dirRight = firstRow.right - svgRect.left + 4;
+        const contentRight = Array.from(groupRows).reduce((right, row) => {
+          const note = row.querySelector(".directory-note");
+          const code = row.querySelector("code");
+          const target = note || code;
+          if (!target) return right;
+          return Math.max(right, target.getBoundingClientRect().right - svgRect.left);
+        }, 0);
         const cardLeft = cardRect.left - svgRect.left - 4;
 
-        const dx = cardLeft - dirRight;
-        const cp1x = dirRight + dx * 0.45;
-        const cp2x = cardLeft - dx * 0.45;
+        const bracketLeft = Math.min(cardLeft - 52, contentRight + 22);
+        const bracketRight = Math.min(cardLeft - 18, bracketLeft + 46);
+        const linkStartY = Math.min(Math.max(cardCenterY, topY + 14), bottomY - 14);
 
-        path.setAttribute("d", `M ${dirRight} ${midY} C ${cp1x} ${midY}, ${cp2x} ${cardCenterY}, ${cardLeft} ${cardCenterY}`);
+        path.setAttribute(
+          "d",
+          `M ${bracketLeft} ${topY} H ${bracketRight} V ${bottomY} H ${bracketLeft} M ${bracketRight} ${linkStartY} H ${cardLeft}`
+        );
       });
     };
 
@@ -289,9 +305,15 @@ export function ArchitectureSection() {
                 {architectureDirectory.map((item) => (
                   <div
                     key={`${item.depth}-${item.label}`}
-                    className={`directory-row directory-depth-${item.depth}${item.group ? ` directory-group-${item.group}` : ""}`}
+                    className={`directory-row directory-depth-${item.depth}${item.group ? ` directory-group-${item.group}` : ""}${item.groupIndex ? " is-group-start" : ""}`}
                   >
+                    {item.groupIndex ? <span className="directory-index">{item.groupIndex}</span> : null}
                     <span className="directory-branch" aria-hidden="true" />
+                    {item.type === "folder" ? (
+                      <Folder className="directory-icon" size={13} aria-hidden="true" />
+                    ) : (
+                      <FileText className="directory-icon" size={13} aria-hidden="true" />
+                    )}
                     <code className={item.type === "folder" ? "is-folder" : ""}>
                       {item.label}
                     </code>
@@ -306,8 +328,25 @@ export function ArchitectureSection() {
                     key={card.group}
                     className={`connector-line connector-${card.group}`}
                     data-group={card.group}
+                    markerEnd={`url(#arrow-${card.group})`}
                   />
                 ))}
+                <defs>
+                  {summaryCards.map((card) => (
+                    <marker
+                      key={card.group}
+                      id={`arrow-${card.group}`}
+                      viewBox="0 0 10 10"
+                      refX="8"
+                      refY="5"
+                      markerWidth="5"
+                      markerHeight="5"
+                      orient="auto-start-reverse"
+                    >
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill={card.color} opacity="0.72" />
+                    </marker>
+                  ))}
+                </defs>
               </svg>
 
               <div className="directory-summary-cards" aria-label="资产汇总卡片">
@@ -317,6 +356,7 @@ export function ArchitectureSection() {
                     className={`summary-card summary-card-${card.group}`}
                     style={{ "--card-color": card.color }}
                   >
+                    {card.badge ? <span className="summary-card-badge">{card.badge}</span> : null}
                     <strong>{card.title}</strong>
                     <span>{card.desc}</span>
                   </div>
