@@ -563,6 +563,10 @@ a {
   position: relative;
   min-height: 708px;
   padding: 25px 26px 30px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(200px, 0.45fr);
+  gap: 0;
+  align-items: start;
 }
 
 .architecture-directory {
@@ -570,6 +574,7 @@ a {
   display: grid;
   max-width: 520px;
   gap: 7px;
+  grid-column: 1;
 }
 
 .architecture-directory::before {
@@ -641,65 +646,96 @@ a {
   line-height: 1.45;
 }
 
-.directory-annotations {
+/* Connector SVG */
+.directory-connector-svg {
   position: absolute;
-  inset: 25px 26px 30px auto;
-  width: 205px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  z-index: 2;
 }
 
-.directory-annotation {
-  position: absolute;
-  right: 0;
-  display: inline-flex;
-  align-items: center;
-  padding: 9px 13px;
-  border: 1px solid rgba(251, 113, 133, 0.78);
-  border-radius: 999px;
-  background: #fff7f8;
-  color: #be123c;
-  font-size: 0.72rem;
-  font-weight: 850;
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.18);
+.connector-line {
+  stroke: rgba(251, 113, 133, 0.45);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+  fill: none;
+  transition: stroke 0.3s ease;
 }
 
-.directory-annotation::before {
-  position: absolute;
-  top: 50%;
-  right: 100%;
-  width: var(--annotation-line, 82px);
-  height: 1px;
-  background: rgba(251, 113, 133, 0.82);
-  content: "";
+.connector-line:hover {
+  stroke: rgba(251, 113, 133, 0.85);
+  stroke-dasharray: none;
 }
 
-.directory-annotation::after {
-  position: absolute;
-  top: calc(50% - 4px);
-  right: calc(100% + var(--annotation-line, 82px) - 7px);
-  width: 8px;
-  height: 8px;
-  border-top: 1px solid #fb7185;
-  border-left: 1px solid #fb7185;
-  content: "";
-  transform: rotate(-45deg);
+/* Summary Cards */
+.directory-summary-cards {
+  display: grid;
+  gap: 14px;
+  grid-column: 3;
+  align-self: start;
+  padding-top: 10px;
 }
 
-.directory-annotation-metric {
-  top: 245px;
-  --annotation-line: 118px;
+.summary-card {
+  position: relative;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.directory-annotation-table {
-  top: 422px;
-  --annotation-line: 94px;
+.summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  border-color: var(--card-color);
 }
 
-.directory-annotation-case {
-  top: 615px;
-  --annotation-line: 76px;
+.summary-card strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--card-color);
+  margin-bottom: 6px;
+}
+
+.summary-card span {
+  display: block;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.summary-card-metrics {
+  border-color: rgba(167, 139, 250, 0.2);
+}
+.summary-card-metrics:hover {
+  border-color: #a78bfa;
+}
+
+.summary-card-tables {
+  border-color: rgba(96, 165, 250, 0.2);
+}
+.summary-card-tables:hover {
+  border-color: #60a5fa;
+}
+
+.summary-card-rules {
+  border-color: rgba(74, 222, 128, 0.2);
+}
+.summary-card-rules:hover {
+  border-color: #4ade80;
+}
+
+.summary-card-cases {
+  border-color: rgba(251, 191, 36, 0.2);
+}
+.summary-card-cases:hover {
+  border-color: #fbbf24;
 }
 
 .architecture-side {
@@ -1249,7 +1285,7 @@ a {
 }
 
 .asset-card {
-  min-height: 205px;
+  min-height: 230px;
   padding: 24px;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
@@ -1260,8 +1296,34 @@ a {
   color: #e11d48;
 }
 
+.asset-count {
+  margin: 20px 0 4px;
+  color: #e11d48;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.asset-unit {
+  display: block;
+  margin-bottom: 12px;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.asset-unit sub {
+  display: block;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
 .asset-card h3 {
-  margin: 33px 0 9px;
+  margin: 10px 0 9px;
   font-size: 1rem;
 }
 
@@ -1626,8 +1688,24 @@ a {
     border-bottom: 1px solid #334155;
   }
 
-  .directory-annotations {
+  .architecture-tree-body {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .architecture-directory {
+    max-width: 100%;
+  }
+
+  .directory-connector-svg {
     display: none;
+  }
+
+  .directory-summary-cards {
+    grid-column: 1;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding-top: 0;
   }
 }
 
@@ -1825,6 +1903,14 @@ a {
 
   .closing-statement {
     align-items: flex-start;
+  }
+
+  .asset-count {
+    font-size: 2.2rem;
+  }
+
+  .asset-card {
+    min-height: 200px;
   }
 
   .report-footer div {

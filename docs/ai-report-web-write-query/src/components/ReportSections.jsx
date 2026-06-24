@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   ArrowRight,
   BookOpenCheck,
@@ -45,10 +46,8 @@ const assetIcons = [
 const architectureDirectory = [
   { depth: 0, label: ".agents/skills/write-query/", type: "folder", note: "自然语言取数技能包" },
   { depth: 1, label: "SKILL.md", type: "file", note: "入口、路径判断与运行流程" },
-  { depth: 1, label: "scripts/", type: "folder" },
-  { depth: 2, label: "audit_sql.py", type: "file", note: "SQL 规则审计" },
-  { depth: 2, label: "lint_metric_index.py", type: "file", note: "指标索引检查" },
-  { depth: 1, label: "references/", type: "folder", note: "按需读取的知识资产" },
+  // ===== references/ 组 =====
+  { depth: 1, label: "references/", type: "folder", group: "metrics", note: "按需读取的知识资产" },
   { depth: 2, label: "METRIC_INDEX.md", type: "file", note: "指标口径总入口" },
   { depth: 2, label: "metrics/", type: "folder" },
   { depth: 3, label: "基本面/", type: "folder" },
@@ -56,15 +55,50 @@ const architectureDirectory = [
   { depth: 4, label: "M-BASIC-BB-002 主宽入网积分.md", type: "file" },
   { depth: 3, label: "专题/", type: "folder" },
   { depth: 4, label: "M-TOPIC-BB-001 宽带T+n有效率.md", type: "file" },
+  // ===== tables/ 组 =====
+  { depth: 1, label: "tables/", type: "folder", group: "tables", note: "表资产索引与文档" },
   { depth: 2, label: "TABLE_INDEX.md", type: "file", note: "表资产索引" },
-  { depth: 2, label: "tables/", type: "folder" },
-  { depth: 3, label: "040_全业务号码订单表.md", type: "file" },
-  { depth: 3, label: "041_优惠订单表.md", type: "file" },
-  { depth: 3, label: "069_全业务资料表.md", type: "file" },
+  { depth: 2, label: "040_全业务号码订单表.md", type: "file", note: "订单类表" },
+  { depth: 2, label: "041_优惠订单表.md", type: "file", note: "订单类表" },
+  { depth: 2, label: "069_全业务资料表.md", type: "file", note: "客户资料类表" },
+  { depth: 2, label: "...", type: "file", note: "更多表文档" },
+  // ===== rules/ 组 =====
+  { depth: 1, label: "rules/", type: "folder", group: "rules", note: "规则与推理资源" },
   { depth: 2, label: "ROUTING.md", type: "file", note: "主表路由" },
-  { depth: 2, label: "FIELD_BACKFILL.md", type: "file", note: "字段补表" },
-  { depth: 2, label: "RULES.md", type: "file", note: "生成规范与自检" },
-  { depth: 2, label: "verified-cases/", type: "folder", note: "真实案例沉淀" },
+  { depth: 2, label: "FIELD_BACKFILL.md", type: "file", note: "字段补表规则" },
+  { depth: 2, label: "RULES.md", type: "file", note: "生成规范与校验规则" },
+  // ===== verified-cases/ 组 =====
+  { depth: 1, label: "verified-cases/", type: "folder", group: "cases", note: "真实案例沉淀" },
+  { depth: 2, label: "001_主宽入网统计.sql", type: "file", note: "主宽入网统计案例" },
+  { depth: 2, label: "002_留存分析.sql", type: "file", note: "留存分析案例" },
+  { depth: 2, label: "...", type: "file", note: "更多已验证案例" },
+];
+
+const summaryCards = [
+  {
+    group: "metrics",
+    title: "指标口径库",
+    desc: "统一指标定义\n300+ 标准指标",
+    color: "#a78bfa",
+  },
+  {
+    group: "tables",
+    title: "表资产库",
+    desc: "核心数据表文档\n100+ 核心表",
+    color: "#60a5fa",
+  },
+  {
+    group: "rules",
+    title: "规则库",
+    desc: "路由 + 补表 + 生成规范\n保障结果准确可靠",
+    color: "#4ade80",
+  },
+  {
+    group: "cases",
+    title: "案例库",
+    desc: "真实取数案例\n持续沉淀与验证",
+    color: "#fbbf24",
+  },
 ];
 
 function SectionHeader({ label, title, desc, inverse = false, align = "center" }) {
@@ -177,6 +211,46 @@ export function PainSection() {
 }
 
 export function ArchitectureSection() {
+  useEffect(() => {
+    const calcConnectors = () => {
+      const svg = document.querySelector(".directory-connector-svg");
+      if (!svg) return;
+
+      const svgRect = svg.getBoundingClientRect();
+
+      summaryCards.forEach((card) => {
+        const groupRows = document.querySelectorAll(`.directory-group-${card.group}`);
+        const path = svg.querySelector(`.connector-${card.group}`);
+        const cardEl = document.querySelector(`.summary-card-${card.group}`);
+        if (!groupRows.length || !path || !cardEl) return;
+
+        const firstRow = groupRows[0].getBoundingClientRect();
+        const lastRow = groupRows[groupRows.length - 1].getBoundingClientRect();
+        const cardRect = cardEl.getBoundingClientRect();
+
+        const midY = (firstRow.top + lastRow.bottom) / 2 - svgRect.top;
+        const cardCenterY = cardRect.top + cardRect.height / 2 - svgRect.top;
+
+        const dirRight = firstRow.right - svgRect.left + 4;
+        const cardLeft = cardRect.left - svgRect.left - 4;
+
+        const dx = cardLeft - dirRight;
+        const cp1x = dirRight + dx * 0.45;
+        const cp2x = cardLeft - dx * 0.45;
+
+        path.setAttribute("d", `M ${dirRight} ${midY} C ${cp1x} ${midY}, ${cp2x} ${cardCenterY}, ${cardLeft} ${cardCenterY}`);
+      });
+    };
+
+    calcConnectors();
+    const timer = setTimeout(calcConnectors, 100);
+    window.addEventListener("resize", calcConnectors);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", calcConnectors);
+    };
+  }, []);
+
   return (
     <section id="architecture" className="report-section architecture-section">
       <div className="report-container">
@@ -215,7 +289,7 @@ export function ArchitectureSection() {
                 {architectureDirectory.map((item) => (
                   <div
                     key={`${item.depth}-${item.label}`}
-                    className={`directory-row directory-depth-${item.depth}`}
+                    className={`directory-row directory-depth-${item.depth}${item.group ? ` directory-group-${item.group}` : ""}`}
                   >
                     <span className="directory-branch" aria-hidden="true" />
                     <code className={item.type === "folder" ? "is-folder" : ""}>
@@ -226,16 +300,27 @@ export function ArchitectureSection() {
                 ))}
               </div>
 
-              <div className="directory-annotations" aria-label="目录标注">
-                <span className="directory-annotation directory-annotation-metric">
-                  数据字典-标准指标
-                </span>
-                <span className="directory-annotation directory-annotation-table">
-                  表结构资产
-                </span>
-                <span className="directory-annotation directory-annotation-case">
-                  真实案例沉淀
-                </span>
+              <svg className="directory-connector-svg" aria-hidden="true">
+                {summaryCards.map((card) => (
+                  <path
+                    key={card.group}
+                    className={`connector-line connector-${card.group}`}
+                    data-group={card.group}
+                  />
+                ))}
+              </svg>
+
+              <div className="directory-summary-cards" aria-label="资产汇总卡片">
+                {summaryCards.map((card) => (
+                  <div
+                    key={card.group}
+                    className={`summary-card summary-card-${card.group}`}
+                    style={{ "--card-color": card.color }}
+                  >
+                    <strong>{card.title}</strong>
+                    <span>{card.desc}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -423,11 +508,16 @@ export function AssetsSection() {
         />
 
         <div className="asset-grid">
-          {reportContent.assets.map(([title, desc], index) => {
+          {reportContent.assets.map(({ title, desc, count, unit, sub }, index) => {
             const Icon = assetIcons[index];
             return (
               <article key={title} className="asset-card reveal">
                 <Icon size={21} />
+                <div className="asset-count">{count}</div>
+                <span className="asset-unit">
+                  {unit}
+                  {sub ? <sub>{sub}</sub> : null}
+                </span>
                 <h3>{title}</h3>
                 <p>{desc}</p>
               </article>
