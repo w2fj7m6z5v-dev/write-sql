@@ -42,6 +42,31 @@ const assetIcons = [
   BookOpenCheck,
 ];
 
+const architectureDirectory = [
+  { depth: 0, label: ".agents/skills/write-query/", type: "folder", note: "自然语言取数技能包" },
+  { depth: 1, label: "SKILL.md", type: "file", note: "入口、路径判断与运行流程" },
+  { depth: 1, label: "scripts/", type: "folder" },
+  { depth: 2, label: "audit_sql.py", type: "file", note: "SQL 规则审计" },
+  { depth: 2, label: "lint_metric_index.py", type: "file", note: "指标索引检查" },
+  { depth: 1, label: "references/", type: "folder", note: "按需读取的知识资产" },
+  { depth: 2, label: "METRIC_INDEX.md", type: "file", note: "指标口径总入口" },
+  { depth: 2, label: "metrics/", type: "folder" },
+  { depth: 3, label: "基本面/", type: "folder" },
+  { depth: 4, label: "M-BASIC-BB-001 主宽入网数.md", type: "file" },
+  { depth: 4, label: "M-BASIC-BB-002 主宽入网积分.md", type: "file" },
+  { depth: 3, label: "专题/", type: "folder" },
+  { depth: 4, label: "M-TOPIC-BB-001 宽带T+n有效率.md", type: "file" },
+  { depth: 2, label: "TABLE_INDEX.md", type: "file", note: "表资产索引" },
+  { depth: 2, label: "tables/", type: "folder" },
+  { depth: 3, label: "040_全业务号码订单表.md", type: "file" },
+  { depth: 3, label: "041_优惠订单表.md", type: "file" },
+  { depth: 3, label: "069_全业务资料表.md", type: "file" },
+  { depth: 2, label: "ROUTING.md", type: "file", note: "主表路由" },
+  { depth: 2, label: "FIELD_BACKFILL.md", type: "file", note: "字段补表" },
+  { depth: 2, label: "RULES.md", type: "file", note: "生成规范与自检" },
+  { depth: 2, label: "verified-cases/", type: "folder", note: "真实案例沉淀" },
+];
+
 function SectionHeader({ label, title, desc, inverse = false, align = "center" }) {
   const centered = align === "center";
   return (
@@ -185,35 +210,73 @@ export function ArchitectureSection() {
               <span />
               <strong>write-query / capability assets</strong>
             </div>
-            <div className="architecture-root">
-              <FileCode2 size={21} />
-              <div>
-                <strong>write-query/</strong>
-                <span>自然语言取数技能包</span>
+            <div className="architecture-tree-body">
+              <div className="architecture-directory" aria-label="write-query 技能资产目录">
+                {architectureDirectory.map((item) => (
+                  <div
+                    key={`${item.depth}-${item.label}`}
+                    className={`directory-row directory-depth-${item.depth}`}
+                  >
+                    <span className="directory-branch" aria-hidden="true" />
+                    <code className={item.type === "folder" ? "is-folder" : ""}>
+                      {item.label}
+                    </code>
+                    {item.note ? <span className="directory-note">{item.note}</span> : null}
+                  </div>
+                ))}
               </div>
-            </div>
-            <div className="architecture-list">
-              {reportContent.architecture.map(([name, desc]) => (
-                <div key={name}>
-                  <code>{name}</code>
-                  <span>{desc}</span>
-                </div>
-              ))}
+
+              <div className="directory-annotations" aria-label="目录标注">
+                <span className="directory-annotation directory-annotation-metric">
+                  数据字典-标准指标
+                </span>
+                <span className="directory-annotation directory-annotation-table">
+                  表结构资产
+                </span>
+                <span className="directory-annotation directory-annotation-case">
+                  真实案例沉淀
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="on-demand-panel">
-            <span className="section-label section-label-inverse">On-demand loading</span>
-            <h3>技能不会一次加载全部资料</h3>
-            <p>每个步骤只读取当前决策所需的知识，让上下文更聚焦，也让生成路径更可解释。</p>
-            <ol>
-              {reportContent.onDemandReads.map((item, index) => (
-                <li key={item}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  {item}
-                </li>
-              ))}
-            </ol>
+          <div className="architecture-side">
+            <div className="directory-callout">
+              <span>Directory map</span>
+              <h3>从目录就能看出技能如何工作</h3>
+              <p>
+                入口、脚本、表索引、指标口径、补表规则和真实案例分层维护，AI 按任务阶段读取对应资产。
+              </p>
+            </div>
+
+            <div className="directory-metrics" aria-label="目录资产概览">
+              <div>
+                <strong>主入口</strong>
+                <span>SKILL.md</span>
+              </div>
+              <div>
+                <strong>规则层</strong>
+                <span>ROUTING · FIELD_BACKFILL · RULES</span>
+              </div>
+              <div>
+                <strong>知识层</strong>
+                <span>tables · metrics · verified-cases</span>
+              </div>
+            </div>
+
+            <div className="on-demand-panel">
+              <span className="section-label section-label-inverse">On-demand loading</span>
+              <h3>技能不会一次加载全部资料</h3>
+              <p>每个步骤只读取当前决策所需的知识，让上下文更聚焦，也让生成路径更可解释。</p>
+              <ol>
+                {reportContent.onDemandReads.map((item, index) => (
+                  <li key={item}>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
         </div>
 
