@@ -1,5 +1,4 @@
 import {
-  ArrowDown,
   ArrowRight,
   BookOpenCheck,
   Boxes,
@@ -101,11 +100,6 @@ export function HeroSection() {
             );
           })}
         </div>
-
-        <a className="hero-scroll" href="#pain">
-          <span>进入汇报</span>
-          <ArrowDown size={17} />
-        </a>
       </div>
     </section>
   );
