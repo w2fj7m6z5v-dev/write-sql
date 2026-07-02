@@ -96,6 +96,7 @@ runtime: true
 | 银行账户名称 / 户名 / 支付账户 / 开户银行 / 银行名称 | 服务实例支付账户与银行信息 | 附件或 069 补 `serv_id` → 131 → 132 → 133 → 134 | `serv_id/prod_inst_id -> acct_id -> pay_acct_id/ext_acct_id -> acct_owner_org_branch/bank_id` | `pay_acct_name` 是账户户名，不是银行名称；银行名称取 134.`bank_name`；多账户/多支付方案默认保留明细 |
 | 终端自注册机型 / 终端制式 / 手机厂商 / IMEI / IMSI | 终端自注册信息 | 附件号码或 069 `acc_nbr` → 123 终端自注册清单 | `acc_nbr`；输出 `terminal_type/brand_type/factory/brand/register_time/imsi/imei1/imei2` | 与 119 设备资源不同；一号一行默认按 `register_time` 取最新 |
 | 新装 / 入网 | 新入网规模 | 069 全业务资料表 | `is_new_user=1`、`open_date`、`subs_id` | 宽带、移动、固话及其它产品入网量默认都走 069 |
+| 快捷宽带 / 快宽 | 快捷宽带产品入网 | 069 全业务资料表 | `prod_type3='快捷宽带'`；入网量用标准指标 M-BASIC-BB-008 | 入网积分 `sum(jz_points)`，同主表同条件 |
 | 到达 / 在网 / 出账 | 存量状态 | 069 全业务资料表 | `is_cz`、`is_cancel_user`、`is_online_user` | 规模类口径；**用户说「状态」见下行** |
 | 状态 / 号码状态 / 用户状态 | 服务状态码 + 中文名 | 069 全业务资料表 | **`state`**（码值）；中文 **`dws_attr_value.attr_value_name`**（`attr_id='4000000201'`） | **默认字段是 `state`，不是 `is_cancel_user` 等**；交付需 **码值 + 中文名**；详见 `FIELD_BACKFILL.md`、`VC-20260520-002` |
 | VPN 群号 / 集团 VPN / 校园 VPN 号码 | VPN 群下移动号码 | 069 全业务资料表 | `vpn_value`；移动号码常加 `prod_type=30`，在网常加 `is_cancel_user=0` | VPN 群号由需求方给定，不沉淀具体群号；圈出 `serv_id/acc_nbr` 后可接销售品、收入、终端、积分等标签 |

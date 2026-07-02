@@ -46,6 +46,10 @@ and prod_type3='快捷宽带'
 - 将固定月份参数化（如 `par_month_id`、`month_id`、`day_id`）。
 - 若涉及日期范围，建议统一为 `${start_day}` / `${end_day}`。
 
+## 快捷宽带入网积分
+
+快捷宽带入网积分与入网数同主表（069 全业务资料表）、同过滤条件（`prod_type3='快捷宽带'`、`is_new_user=1`、`open_date`），度量为 `SUM(jz_points)`（套餐价值积分，分摊后）。与主宽入网数/入网积分（M-BASIC-BB-001/002）的模式一致。
+
 ## 依赖说明
 
 - 相关表请通过 `../../METRIC_INDEX.md` 定位 A 层表文档；技术口径仍以本文件 SQL 为准。
