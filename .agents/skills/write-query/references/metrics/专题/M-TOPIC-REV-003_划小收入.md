@@ -26,13 +26,13 @@ source_file: "收入.md"
 
 ## 业务口径
 
-划小收入来自最终版划小收入或收入生产视图，常用 `sum(a0)` 统计税后收入；分营服/包区明细可同时输出 `branch_id`、`branch_name`、`area_id`、`area_name`、`region_type`、`prod_id`、`prod_name`、`due_type`。
+划小收入来自最终版划小收入表 `dwm_srhx_serv_list_mon_final`，常用 `sum(a0)` 统计税后收入；分营服/包区明细可同时输出 `branch_id`、`branch_name`、`area_id`、`area_name`、`region_type`、`prod_id`、`prod_name`、`due_type`。
 
 ## 技术口径（SQL）
 
 ```sql
 SELECT sum(a0) AS sh,par_month_id
-FROM zone_gz.view_分局缩写（th,lw,py....）_ads_srhx_serv_list_mon
+FROM dwm_srhx_serv_list_mon_final
 WHERE par_month_id = 202501 --统计月份
 GROUP BY par_month_id
 ;

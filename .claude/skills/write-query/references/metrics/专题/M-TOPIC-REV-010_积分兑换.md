@@ -32,7 +32,7 @@ source_file: "收入.md"
 
 ```sql
 SELECT sum(b3) AS sh,par_month_id
-FROM zone_gz.view_分局缩写（th,lw,py....）_ads_srhx_serv_list_mon
+FROM dwm_srhx_serv_list_mon_final
 WHERE par_month_id = 202501 --统计月份
 GROUP BY par_month_id
 ;
