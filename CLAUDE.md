@@ -79,45 +79,80 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## PR 审核
 
-### 自动审核（CI）
+### 审核流程总览
 
-每次提交 PR 时，GitHub Actions 自动运行以下检查（`.github/workflows/pr-review.yml`）：
+```
+PR 提交 → CI 自动检查（秒级）→ 本地 AI 深度审核（分钟级）→ 合并
+  GitHub Checks 看结果    在 Claude Code 中完成          gh pr merge
+```
 
-| 检查项 | 工具 | 触发条件 |
-|--------|------|----------|
-| 双入口一致性 | `bash scripts/sync_skills.sh check` | 始终运行 |
-| SQL 静态审计 | `python .claude/skills/write-query/scripts/audit_sql.py` | 有 `.sql` 文件变更时 |
-| METRIC_INDEX 引用校验 | `python .claude/skills/write-query/scripts/lint_metric_index.py` | METRIC_INDEX.md 变更时 |
-| Skills 同步校验 | `bash scripts/sync_skills.sh check` | `.agents/skills/` 或 `.claude/skills/` 变更时 |
+### 第一步：看 CI 结果
 
-### 本地深度审核
+PR 提交后 GitHub Actions 自动运行，PR 页面点 **Checks** 查看：
 
-使用 `scripts/review-pr.sh` 进行交互式 AI 审核：
+| 检查 | 绿勾 = 通过 | 红叉 = 需要修复 |
+|------|-------------|-----------------|
+| 双入口一致性 | `.agents/skills/` 和 `.claude/skills/` 同步 | 执行 `sync_skills.sh sync` 同步 |
+| SQL 审计 | 无占位符、SELECT *、旧表名等 | 看日志修复具体问题 |
+| METRIC_INDEX 引用 | 所有指标链接有效 | 修复断链 |
+
+CI 红叉就先让 PR 作者修，绿勾了再进入 AI 审核。
+
+### 第二步：AI 协助审核（在 Claude Code 中完成）
+
+**直接把 PR 拉下来，告诉 Claude Code 审核即可：**
+
+```
+审核 PR #5，重点关注：
+1. 双入口文件是否一致
+2. 新增/修改的 SQL 口径是否正确
+3. 表文档字段和 TABLE_INDEX 是否一致
+4. ROUTING 路由是否合理
+5. 码值是否合规（不能有中文状态字面量）
+```
+
+**Claude Code 会自动：**
+- 跑 `git diff origin/main...HEAD` 看变更
+- 对照 `RULES.md` 审计 SQL 口径
+- 对照 `TABLE_INDEX.md` 校验表名/字段
+- 对照 `ROUTING.md` 检查路由逻辑
+- 检查双入口文件是否同步
+- 输出问题清单和合并建议
+
+**你只需要在审核结果中做最后决策：**
+- 阻断性问题 → 让作者修
+- 建议项 → 可以合并，后续 PR 跟进
+- 没问题 → 直接合并
+
+### 第三步：合并
 
 ```bash
-# 审核指定 PR
-bash scripts/review-pr.sh 123
-
-# 自动检测当前分支关联的 PR
-bash scripts/review-pr.sh
+gh pr merge <PR_NUMBER> --merge
 ```
 
-脚本会自动：
-1. 暂存本地修改（`git stash`）
-2. 检出 PR 分支
-3. 运行机械检查
-4. 提示是否运行 AI 深度审核（使用 `/code-review`）
-5. 恢复原分支和本地修改
+### 快速上手
 
-### 审核流程
+在本项目根目录打开 Claude Code，有 PR 要审核时直接说：
 
 ```
-PR 提交 → CI 自动机械检查（秒级）→ 本地 `review-pr.sh` AI 深度审核（分钟级）→ 人工口径核验 → 合并
+审核 PR #N
 ```
 
-- **机械检查**：CI 自动完成，PR 提交即触发，结果在 GitHub Checks 选项卡查看
-- **AI 深度审核**：本地运行，利用 Claude Code 的 code-reviewer agent（Opus）分析业务口径、SQL 语义、安全性
-- **人工核验**：确认业务逻辑正确性，这是 AI 无法替代的最后一道防线
+Claude Code 会完成 stash → checkout → diff → 审计 → 报告的全流程。审完说"合并"，自动 `gh pr merge`。
+
+### AI 审核检查清单
+
+每次 AI 审核自动覆盖以下维度：
+
+| 维度 | 检查点 |
+|------|--------|
+| 双入口 | `.agents/skills/` 和 `.claude/skills/` 变更文件是否一一对应 |
+| 表文档 | 新增表文档是否包含 Hive 表名、分区、字段、粒度、常用过滤 |
+| 表索引 | `TABLE_INDEX.md` 是否同步新增表记录 |
+| 路由 | `ROUTING.md` 新路由是否准确，是否标注了反模式（不要用 X 替代） |
+| SQL 口径 | 时间字段、分区、码值、JOIN 条件、去重是否合规 |
+| 码值 | 状态/动作字段是否使用码值而非中文字面量 |
+| 命名 | 输出字段别名是否使用英文 snake_case |
 
 ## 注意事项
 
