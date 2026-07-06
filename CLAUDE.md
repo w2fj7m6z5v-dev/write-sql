@@ -77,6 +77,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 号码订单 → `全业务号码订单表`(040)
 - 套餐订单 → `宽带到达套餐收入清单`(050)
 
+## PR 审核
+
+### 自动审核（CI）
+
+每次提交 PR 时，GitHub Actions 自动运行以下检查（`.github/workflows/pr-review.yml`）：
+
+| 检查项 | 工具 | 触发条件 |
+|--------|------|----------|
+| 双入口一致性 | `bash scripts/sync_skills.sh check` | 始终运行 |
+| SQL 静态审计 | `python .claude/skills/write-query/scripts/audit_sql.py` | 有 `.sql` 文件变更时 |
+| METRIC_INDEX 引用校验 | `python .claude/skills/write-query/scripts/lint_metric_index.py` | METRIC_INDEX.md 变更时 |
+| Skills 同步校验 | `bash scripts/sync_skills.sh check` | `.agents/skills/` 或 `.claude/skills/` 变更时 |
+
+### 本地深度审核
+
+使用 `scripts/review-pr.sh` 进行交互式 AI 审核：
+
+```bash
+# 审核指定 PR
+bash scripts/review-pr.sh 123
+
+# 自动检测当前分支关联的 PR
+bash scripts/review-pr.sh
+```
+
+脚本会自动：
+1. 暂存本地修改（`git stash`）
+2. 检出 PR 分支
+3. 运行机械检查
+4. 提示是否运行 AI 深度审核（使用 `/code-review`）
+5. 恢复原分支和本地修改
+
+### 审核流程
+
+```
+PR 提交 → CI 自动机械检查（秒级）→ 本地 `review-pr.sh` AI 深度审核（分钟级）→ 人工口径核验 → 合并
+```
+
+- **机械检查**：CI 自动完成，PR 提交即触发，结果在 GitHub Checks 选项卡查看
+- **AI 深度审核**：本地运行，利用 Claude Code 的 code-reviewer agent（Opus）分析业务口径、SQL 语义、安全性
+- **人工核验**：确认业务逻辑正确性，这是 AI 无法替代的最后一道防线
+
 ## 注意事项
 
 - `TABLE_INDEX.md` 中 Hive 表名已补充完成（2026-04-13）
