@@ -89,6 +89,7 @@ runtime: true
 | 揽装机构 | `salestaff_subst_id`、`salestaff_branch_id` | 主表只有机构 ID | 018 机构维表 | 分局 `salestaff_subst_id = org_id AND levs=3`；营服 `salestaff_branch_id = org_id AND levs=4` | 多次 JOIN 要检查别名 |
 | 双线速率 | 069 `speed_value`；033 `speed_value` | 主路径已在 069 时不补表；已补 033 或用户指定双线清单口径时可取 033 | 033 双线全量清单（可选） | 若补 033，按 `acc_nbr + par_month_id` 关联 | 不要只为速率强行补 033；两边均可取时跟随主路径 |
 | 双线月租 | 033 `yz_cs` | 069 不提供双线月租或用户明确要月租 | 033 双线全量清单 | `主表.acc_nbr = 033.acc_nbr` 且 `主表.par_month_id = 033.par_month_id` | 033 同号码同月可能多行，必要时按 `load_date` 去重 |
+| 专线月租（旧口径） | `serv_id` | 069 不提供专线月租或用户明确要专线月租 | 142 专线月租表 `ads_yz_sx_yz` | `主表.serv_id = 142.serv_id AND 主表.par_month_id = 142.par_month_id`；取 `yz_cs_old` | 与 033 yz_cs 双线口径不同；本表专线旧口径 |
 | 客户名称 | `cust_name`、`cust_name_tm`、`cust_id` | 主表脱敏/不脱敏不满足时 | 客户表或 069 | 主表自带优先；跨表时按 `serv_id/cust_id` 谨慎关联 | 069 `cust_name_tm` 是脱敏名 |
 | 状态 / 动作含义 | `subs_stat`、`action_id`、`subs_stat_reason` | 需要解释或过滤码值 | `D_experience/dictionaries/{field}.md` | 不 JOIN，直接查码值后写 WHERE | WHERE 禁止中文状态 |
 | **服务状态 `state`（069）** | **`state`**（码值） | **输出状态字段或用户说「状态/号码状态」** | **`dws_crm_cfguse.dws_attr_value`**（`tables/015_字典表视图.md`） | `attr_id='4000000201'` AND `attr_value = cast(state as string)` → **`attr_value_name`** | **默认同时输出 `state` 码值与中文名**；勿用 `is_cancel_user` 等代替，除非用户明确要规模口径 |
