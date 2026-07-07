@@ -156,3 +156,4 @@
 | 137 | 小翼发展清单 | zone_gz_yz.ads_yz_zqb_xyqg | zone_gz_yz.ads_yz_zqb_xyqg | tables/137_小翼发展清单.md | 服务/销售品粒度 | par_month_id | 政企全光组网-小翼主从网关发展量统计；按 `offer_name RLIKE '主网关\|从网关'` 区分主从网关 | 不要与 002 FTTR 清单或 138 高阶网关清单混用 |
 | 138 | 高阶网关发展清单 | zone_gz_yz.ads_yz_wyh_gjwg_new_list | zone_gz_yz.ads_yz_wyh_gjwg_new_list | tables/138_高阶网关发展清单.md | 服务粒度 | par_month_id | 政企全光组网-高阶网关主从网关发展量统计；按 `cj_type2` 区分主网关/从网关 | 不要与 002 FTTR 清单或 137 小翼清单混用 |
 | 139 | 固话通话月表 | summary_ods_month_city.TB_COMM_YWL_GW_mon | summary_ods_month_city.TB_COMM_YWL_GW_mon | tables/139_固话通话月表.md | 服务-月份粒度 | par_month_id | 固话通话时长查询；按 `serv_id + par_month_id` 取 `DUR`（秒），常用 `DUR/60` 转分钟 | 广州固定 `par_corp_id='200'` |
+| 140 | OP人员信息表 | ads_yz.ads_yz_dim_op_final | ads_yz.ads_yz_dim_op_final | tables/140_OP人员信息表.md | OP人员粒度，当前月+历史月合并 | par_month_id | 查询OP人员薪酬岗位、531薪酬统计、天河分公司等各分公司OP人员信息 | 非OP体系人员不要查本表；揽装人信息用 111/113 |
