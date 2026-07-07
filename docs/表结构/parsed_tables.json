@@ -1,0 +1,82 @@
+[
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "员工标识",
+    "fieldEngName": "staff_id",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "员工账号",
+    "fieldEngName": "staff_account",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "销售员编码：12位，类型码1位(Y)，地区码6位、序列码5位两部分组成",
+    "fieldEngName": "salesstaff_code",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "参与人标识,参与人唯一标识",
+    "fieldEngName": "party_id",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "员工编码",
+    "fieldEngName": "staff_code",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "组织标识外键,员工的归属管理组织",
+    "fieldEngName": "org_id",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "员工类型，LOVB,内部员工外部员工电信外包员工",
+    "fieldEngName": "staff_type",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "员工名称",
+    "fieldEngName": "staff_name",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "员工描述",
+    "fieldEngName": "staff_desc",
+    "dictType": null,
+    "dictDesc": null
+  },
+  {
+    "tableChnName": "指与中国电信存在雇佣关系的个人，包括内部员工和外部员工。例如：支撑系统的操作人员、合作伙伴员工、政企客户的自助人员。",
+    "tableEngName": "dws_staff",
+    "fieldChnName": "记录员工状态，LOVB，有效、暂停、锁定、密码错误锁定、停用、无效、未生效",
+    "fieldEngName": "status_cd",
+    "dictType": null,
+    "dictDesc": null
+  }
+]

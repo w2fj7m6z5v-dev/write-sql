@@ -1697,11 +1697,17 @@ a {
   text-align: center;
 }
 
+.closing-statement svg {
+  flex: 0 0 auto;
+}
+
 .closing-statement p {
   margin: 0;
+  max-width: 980px;
   color: #fff;
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 750;
+  line-height: 1.75;
 }
 
 .report-footer {

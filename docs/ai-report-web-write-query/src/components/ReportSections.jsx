@@ -80,7 +80,7 @@ const summaryCards = [
   {
     group: "metrics",
     title: "指标库",
-    desc: "统一指标定义\n300+ 标准指标",
+    desc: "统一指标定义\n91 标准指标",
     badge: "数据字典",
     color: "#a78bfa",
   },
@@ -675,7 +675,9 @@ export function RoadmapSection() {
         <div className="closing-statement reveal">
           <Users size={28} />
           <p>
-            在使用中验证，在验证中沉淀，持续提升生成准确性与场景覆盖能力。
+            目前，自然语言生成 SQL 能力已封装为可运行的 Agent Skill，形成了能力雏形，并已在真实取数场景中开展试用。该 Skill
+            吸收《标准化数据字典》项目沉淀的指标口径与维度字段成果，融合主表路由、字段补表、SQL
+            生成与校验规则及验证案例。下一步将坚持边使用、边验证、边沉淀，持续提升生成准确性、稳定性和场景覆盖能力。
           </p>
         </div>
       </div>
