@@ -42,3 +42,17 @@ category: "产品分类"
 - `is_rh_ykj=0` 是单产品；`is_rh_ykj=1` 是融合（严口径）
 - 融合宽口径可用 `is_rh_ykj>0`
 - 分类口径用于 WHERE 过滤，不是度量值；不产生 COUNT/SUM
+
+## 单移子类细分
+
+在单移（`prod_type=30 AND is_rh_ykj=0`）基础上，按 `yd_prod_type1` / `yd_prod_type2` 进一步细分：
+
+| 子类 | 条件 | 说明 |
+|------|------|------|
+| 预付费单产品 | `yd_prod_type1 = '预付费单产品'` | 移动预付费单产品 |
+| 后付费单产品 | `yd_prod_type1 = '后付费单产品'` | 移动后付费单产品 |
+| 单产品独立 | `yd_prod_type2 = '单产品独立'` | 移动单产品独立标识 |
+| 融合（主卡） | `yd_prod_type1 = '融合'` | 融合套餐中的移动主卡 |
+| 副卡 | `yd_prod_type1 = '副卡'` | 移动副卡 |
+
+适用表：069 全业务资料表（`yd_prod_type1`、`yd_prod_type2` 字段）
