@@ -1,0 +1,112 @@
+工单编号 XQGZ2026061601150 需求标题 关于广州曙光美云口腔医院有限公司2026年拆机号码导出的需求 需求关键词 关于广州曙光美云口腔医院有限公司2026年拆机号码导出的需求 
+提交人 王娜玲 提交人电话 18922189676,02086247567 提交部门 广东公司/市分公司/广州分公司/白云分公司/白云数字政务BU营销服务中心 
+提交日期 2026-06-16 14:00:45 需求负责人  
+
+需求描述 客户：广州曙光美云口腔医院有限公司，客户编码：2020940037020000，因2026年累计拆机数已过50户，需走拆机流量预警，内部流程需要，申请导出客户名下2026年所有拆机号码、拆机时间和拆机主套餐，妥否，请领导审批，谢谢！ 
+需求目标 关于广州曙光美云口腔医院有限公司2026年拆机号码导出的需求 
+=============================================================================
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061601150_001 purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061601150_001
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as
+select a.cust_nbr,a.par_month_id,a.serv_id,a.acc_nbr,a.prod_id,k.prod_name
+,a.state,c.attr_value_name as state_desc--使用状态
+,a.is_wl_cancel_user,a.wl_cancel_subs_stat_date
+,a.cdma_disc_type,b.cdma_disc_type3_name--b.cdma_disc_desc--移动主套餐
+,a.kd_prod_offer_id,j.prod_offer_code as kd_prod_offer_code,j.offer_name as kd_prod_offer_name--宽带主套餐
+from zone_gz_yz.dwm_yz_tb_comm_cm_all_mon_final as a
+left join dws_crm_cfguse.dws_product as k on a.prod_id=k.prod_id--产品名称
+left join dws_crm_cfguse.dws_attr_value as c on a.state=c.attr_inner_value and c.attr_id='4000000201' and c.city_id='200'--使用状态
+--left join metadata_ods_day.md_ft_cdma_disc_config as b on a.cdma_disc_type=b.cdma_disc_id--更新不全
+left join metadata_ods_day.tb_dim_cdma_disc_type as b on a.cdma_disc_type=b.cdma_disc_type3
+left join dws_crm_cfguse.dws_offer as j on a.kd_prod_offer_id=cast(j.offer_id as decimal(22,0)) and j.city_id='200'--宽带主套餐
+where a.cust_nbr='2020940037020000'
+ and a.par_month_id>=202601
+ and a.is_wl_cancel_user=1
+union 
+select a.cust_nbr,a.par_month_id,a.serv_id,a.acc_nbr,a.prod_id,k.prod_name
+,a.state,c.attr_value_name as state_desc--使用状态
+,a.is_wl_cancel_user,a.wl_cancel_subs_stat_date
+,a.cdma_disc_type,b.cdma_disc_type3_name--b.cdma_disc_desc--移动主套餐
+,a.kd_prod_offer_id,j.prod_offer_code as kd_prod_offer_code,j.offer_name as kd_prod_offer_name--宽带主套餐
+from zone_gz_yz.dwm_yz_tb_comm_cm_all_final as a
+left join dws_crm_cfguse.dws_product as k on a.prod_id=k.prod_id--产品名称
+left join dws_crm_cfguse.dws_attr_value as c on a.state=c.attr_inner_value and c.attr_id='4000000201' and c.city_id='200'--使用状态
+--left join metadata_ods_day.md_ft_cdma_disc_config as b on a.cdma_disc_type=b.cdma_disc_id--更新不全
+left join metadata_ods_day.tb_dim_cdma_disc_type as b on a.cdma_disc_type=b.cdma_disc_type3
+left join dws_crm_cfguse.dws_offer as j on a.kd_prod_offer_id=cast(j.offer_id as decimal(22,0)) and j.city_id='200'--宽带主套餐
+where a.cust_nbr='2020940037020000'
+ and a.is_wl_cancel_user=1
+ and a.par_month_id=202606
+;
+
+select count(1),count(distinct serv_id) from zone_gz_yz.tmp_XQGZ2026061601150_001;
+select par_month_id,prod_name,count(1) from zone_gz_yz.tmp_XQGZ2026061601150_001 group by par_month_id,prod_name order by par_month_id;
+select * from  zone_gz_yz.tmp_XQGZ2026061601150_001;
+--只有移动产品，发现移动主套餐描述有更新不到的，比如cdma_disc_type in (105200147,105200148)
+
+
+20260618核查
+select cdma_disc_type3,cdma_disc_type3_name 
+from metadata_ods_day.tb_dim_cdma_disc_type
+where cdma_disc_type3 in (105200147,105200148,105700001,105600005)--4条记录都有
+select cdma_disc_id,cdma_disc_desc
+from metadata_ods_day.md_ft_cdma_disc_config
+where cdma_disc_id in (105200147,105200148,105700001,105600005)--只有后面的两条记录
+
+
+
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061601150_final purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061601150_final
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as
+select row_number() over (order by serv_id) as seq_id
+,a.cust_nbr,a.par_month_id,a.serv_id,a.acc_nbr,a.prod_id,a.prod_name
+,a.state,a.state_desc--使用状态
+,a.is_wl_cancel_user,a.wl_cancel_subs_stat_date
+,a.cdma_disc_type,a.cdma_disc_type3_name--移动主套餐
+--,a.kd_prod_offer_id,a.kd_prod_offer_code,a.kd_prod_offer_name--宽带主套餐
+,current_timestamp as load_date
+from zone_gz_yz.tmp_XQGZ2026061601150_001 as a
+;
+
+拆机号码、拆机时间和拆机主套餐，
+----------------------------------------------------------------------------------------------------
+#####提供给需求方的视图#####
+drop view if exists zone_gz.tmp_view_by_XQGZ2026061601150;
+create view if not exists zone_gz.tmp_view_by_XQGZ2026061601150
+(
+cust_nbr                     comment '产权客户编码'
+,acc_nbr                     comment '接入号'
+,hist_create_date            comment '物理拆机时间'
+,cdma_disc_type3_name        comment '移动主套餐'
+,load_date                   comment '装载日期'
+)
+as
+select
+cust_nbr
+,acc_nbr
+,wl_cancel_subs_stat_date as hist_create_date
+,cdma_disc_type3_name
+,load_date
+from zone_gz_yz.tmp_XQGZ2026061601150_final;
+
+
+已提取附件号码能提取到的基本订单清单，请在CDAP平台自助分析模块中查询结果清单：
+select * from zone_gz.tmp_view_by_XQGZ2026061601150
+查看字段描述: desc zone_gz.tmp_view_by_XQGZ2026061601150
+提醒：临时需求数据会被定期清理，请注意及时使用，如有疑问请及时沟通，谢谢！
+========================================================【生产视图赋权及回单】
+

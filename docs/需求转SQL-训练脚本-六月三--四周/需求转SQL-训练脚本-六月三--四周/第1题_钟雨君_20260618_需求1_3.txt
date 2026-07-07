@@ -1,0 +1,24 @@
+需求原始内容：
+XQGZ2025102300993
+
+需求描述 因历史结算问题，需批量核查导出天河公安名下目标号码的揽装人及号码新装的受理下单时间、竣工时间数据。共3个字段，请协助提供，谢谢！ 
+
+需求梳理：
+根据附件的号码，匹配目标号码的揽装工号、揽装人及号码新装的受理下单时间、竣工时间数据
+
+输出字段：
+揽装工号、揽装人、号码新装的受理下单时间、竣工时间
+
+-- 导入号码清单，index1 序号、 index2 号码
+
+-- 在大宽表匹配号码的揽装工号、揽装人、号码新装的受理下单时间、竣工时间
+drop table if exists tmp_XQGZ2025102300993;
+create table tmp_XQGZ2025102300993 row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression' = 'snappy')
+as select cast(b.index1 as int) xuhao,a.serv_id,a.acc_nbr,a.sales_code,a.sales_name,a.act_date,a.subs_stat_date
+from ads_yz_tb_comm_cm_all_final a
+join (select index2 from zone_gz_yz_3542197512722432) b on cast(a.acc_nbr as varchar(96))=cast(b.index2 as varchar(96))
+where a.par_month_id = 202510
+group by a.serv_id,a.acc_nbr,a.sales_code,a.sales_name,a.act_date,a.subs_stat_date
+order by xuhao;
+
+

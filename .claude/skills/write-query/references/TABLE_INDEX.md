@@ -155,3 +155,4 @@
 | 136 | 证件本地表 | dws_crm_cust.dws_party_cert_local | dws_crm_cust.dws_party_cert_local | tables/136_证件本地表.md | party_id + cert_type + cert_num 粒度 |  | 按证件号（身份证 `cert_type='1'`）反查 `party_id`，再经 108 产权客户表获取 `cust_id` | 不要替代 069 的 `social_id` 字段做常规查询；常规证件号→服务对象直接用 069 |
 | 137 | 小翼发展清单 | zone_gz_yz.ads_yz_zqb_xyqg | zone_gz_yz.ads_yz_zqb_xyqg | tables/137_小翼发展清单.md | 服务/销售品粒度 | par_month_id | 政企全光组网-小翼主从网关发展量统计；按 `offer_name RLIKE '主网关\|从网关'` 区分主从网关 | 不要与 002 FTTR 清单或 138 高阶网关清单混用 |
 | 138 | 高阶网关发展清单 | zone_gz_yz.ads_yz_wyh_gjwg_new_list | zone_gz_yz.ads_yz_wyh_gjwg_new_list | tables/138_高阶网关发展清单.md | 服务粒度 | par_month_id | 政企全光组网-高阶网关主从网关发展量统计；按 `cj_type2` 区分主网关/从网关 | 不要与 002 FTTR 清单或 137 小翼清单混用 |
+| 139 | 固话通话月表 | summary_ods_month_city.TB_COMM_YWL_GW_mon | summary_ods_month_city.TB_COMM_YWL_GW_mon | tables/139_固话通话月表.md | 服务-月份粒度 | par_month_id | 固话通话时长查询；按 `serv_id + par_month_id` 取 `DUR`（秒），常用 `DUR/60` 转分钟 | 广州固定 `par_corp_id='200'` |

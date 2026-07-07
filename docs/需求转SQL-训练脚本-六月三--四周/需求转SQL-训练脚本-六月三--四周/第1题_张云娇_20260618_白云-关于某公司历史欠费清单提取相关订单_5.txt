@@ -1,0 +1,222 @@
+工单编号 XQGZ2026061501101 需求标题 关于广东京邦达供应链科技有限公司历史欠费处理 需求关键词 历史欠费 
+提交人 王坚涛 提交人电话 19195584885, 提交部门 广东公司/市分公司/广州分公司/白云分公司/临-外部组织/临-白云交通物流BU营销服务中心 
+提交日期 2026-06-15 12:27:47  
+需求描述 客户广东京邦达供应链科技有限公司现有大额欠费，所附清单中拆机、预拆机、停机的业务是由历史责任客户经理，或客户总部授权仓储、站点经办人自行通过社会代理渠道及其他渠道办理，且经过时间较久，客户总部及仓储/站点的经办人均已换人，客户无法核对真实性。我司已提供对应欠费清单给客户，但由于大部分业务非白云客户经理跟进，无法提供对应资料，客户对此不认可，存在费用争议。
+现申请提取所附清单中接入号的办理拆机、预拆机、停机的完工状态的订单编码、受理时间、揽装人及所属机构、办理业务资料，以便核对欠费情况。 
+需求目标 历史欠费 
+==================================================================================================================
+--上传附件信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061501101_fj purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061501101_fj--stored as orc as
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select 
+index1 as seq_id--序号
+,index2 as acc_nbr--接入号
+,index3 as cust_nbr--产权客户编码
+,index4 as cust_name--产权客户名称
+,index5 as prod_name--产品名称
+,index6 as prod_type2--产品分类2
+,index7 as state_desc--使用状态
+,index8 as salestaff_name--揽装人姓名
+,index9 as billing_cycle_id--账期
+,index10 as qf_qbl_dd--欠费和欠不列-到达
+,index11 as qf_dd--欠费-到达
+,index12 as qbl_dd--欠不列-到达
+,index13 as zy_qbl_dd--在用欠不列-到达
+,index14 as dsdf_dd--代收代付-到达
+from zone_gz_yz.zone_gz_yz_341;
+
+select count(1) from zone_gz_yz.tmp_XQGZ2026061501101_fj ;--464
+select * from zone_gz_yz.tmp_XQGZ2026061501101_fj ;
+
+
+
+--号码唯一
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061501101_acc_only purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061501101_acc_only--stored as orc as
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select acc_nbr,cust_nbr,min(billing_cycle_id) as min_billing_cycle_id
+from zone_gz_yz.tmp_XQGZ2026061501101_fj
+group by acc_nbr,cust_nbr;
+
+select count(1) from zone_gz_yz.tmp_XQGZ2026061501101_acc_only ;--109
+select * from zone_gz_yz.tmp_XQGZ2026061501101_acc_only ;
+
+
+--获取服务标识
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061501101_serv purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061501101_serv--stored as orc as
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select a.*,b.serv_id,b.open_date
+from zone_gz_yz.tmp_XQGZ2026061501101_acc_only as a
+left join zone_gz_yz.dwm_yz_tb_comm_cm_all_mon_final as b on a.acc_nbr=b.acc_nbr and a.cust_nbr=b.cust_nbr and substr(a.min_billing_cycle_id,1,6)=b.par_month_id
+;
+
+
+select count(1) from zone_gz_yz.tmp_XQGZ2026061501101_serv;--109
+select * from zone_gz_yz.tmp_XQGZ2026061501101_serv;
+select * from zone_gz_yz.tmp_XQGZ2026061501101_serv where serv_id is null;--0
+
+
+
+接入号的办理拆机、预拆机、停机的完工状态的订单编码、受理时间、揽装人及所属机构、办理业务资料，以便核对欠费情况。 
+======================================================================================================================
+--历史基本订单表信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061501101_ba_subs_hist purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061501101_ba_subs_hist
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as
+select a.serv_id,a.acc_nbr
+       ,a.subs_id,a.subs_code,a.act_date,a.subs_stat_date,b.action_name--业务名称
+       ,a.salestaff_id,a.sales_code as salestaff_code,a.sales_man_name as salestaff_name--揽装工号（订单表信息）
+       ,a.salestaff_org_id,a.salestaff_subst_id,i.org_id as salestaff_org_id0--揽装人信息（匹配信息）
+       ,current_timestamp as load_date
+from zone_gz_yz.dwm_yz_rpt_comm_ba_subs_mon_final as a
+join zone_gz_yz.tmp_XQGZ2026061501101_serv as aa on a.serv_id=aa.serv_id
+left join dws_crm_cfguse.dws_prod_service_offer_rel as b on a.action_id=b.prod_service_rel_id and b.city_id='200'--业务名称
+left join dws_crm_cfguse.dws_staff as i on a.salestaff_id=i.staff_id and i.city_id in ('0','93','200')--揽装工号
+where a.subs_stat_reason not in ('1200','1300', '002','004')--剔除撤单和作废
+  and a.subs_stat in ( '301200', 'S0C')--'完工'
+;
+
+
+--当前基本订单表信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061501101_ba_subs purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061501101_ba_subs
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as
+select a.serv_id,a.acc_nbr
+       ,a.subs_id,a.subs_code,a.act_date,a.subs_stat_date,b.action_name--业务名称
+       ,a.salestaff_id,a.sales_code as salestaff_code,a.sales_man_name as salestaff_name--揽装工号（订单表信息）
+       ,a.salestaff_org_id,a.salestaff_subst_id,i.org_id as salestaff_org_id0--揽装人信息（匹配信息）
+       ,current_timestamp as load_date
+from zone_gz_yz.dwm_yz_rpt_comm_ba_subs_final as a
+join zone_gz_yz.tmp_XQGZ2026061501101_serv as aa on a.serv_id=aa.serv_id
+left join dws_crm_cfguse.dws_prod_service_offer_rel as b on a.action_id=b.prod_service_rel_id and b.city_id='200'--业务名称
+left join dws_crm_cfguse.dws_staff as i on a.salestaff_id=i.staff_id and i.city_id in ('0','93','200')--揽装工号
+where a.subs_stat_reason not in ('1200','1300', '002','004')--剔除撤单和作废
+  and a.subs_stat in ( '301200', 'S0C')--'完工'
+;
+
+
+--汇总订单信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061501101_subs_ba purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061501101_subs_ba
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as
+select *
+from zone_gz_yz.tmp_XQGZ2026061501101_ba_subs_hist as a
+union 
+select *
+from zone_gz_yz.tmp_XQGZ2026061501101_ba_subs as a
+;
+
+
+
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ2026061501101_final purge;
+create table if not exists zone_gz_yz.tmp_XQGZ2026061501101_final
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as
+select row_number() over (order by subs_id) as seq_id
+,a.serv_id,a.acc_nbr,a.subs_id,a.subs_code,a.act_date,a.subs_stat_date,a.action_name--业务名称
+,a.salestaff_id,a.salestaff_code,a.salestaff_name--揽装工号（订单表信息）
+,h.org_name as salestaff_org_name0
+,current_timestamp as load_date
+from zone_gz_yz.tmp_XQGZ2026061501101_subs_ba as a
+left join dws_crm_cfguse.dws_organization as h on a.salestaff_org_id0=h.org_id and h.city_id in ('0','93','200')
+;
+
+
+select count(1) from zone_gz_yz.tmp_XQGZ2026061501101_ba_subs_hist;--1193
+select count(1) from zone_gz_yz.tmp_XQGZ2026061501101_ba_subs;--19
+select count(1) from zone_gz_yz.tmp_XQGZ2026061501101_final;--1212
+select * from zone_gz_yz.tmp_XQGZ2026061501101_ba_subs_hist;
+select * from zone_gz_yz.tmp_XQGZ2026061501101_ba_subs;
+select * from zone_gz_yz.tmp_XQGZ2026061501101_final where action_name like '%注销%';--
+
+
+
+接入号的办理拆机、预拆机、停机的完工状态的订单编码、受理时间、揽装人及所属机构、办理业务资料，以便核对欠费情况。 
+
+----------------------------------------------------------------------------------------------------
+#####提供给需求方的视图#####
+drop view if exists zone_gz.tmp_view_by_XQGZ2026061501101;
+create view if not exists zone_gz.tmp_view_by_XQGZ2026061501101
+(
+seq_id                   comment '序号'
+,acc_nbr                 comment '接入号'
+,action_name             comment '订单业务名称'
+,subs_code               comment '订单编码'
+,act_date                comment '订单受理时间'
+,subs_stat_date          comment '订单竣工时间'
+,salestaff_id            comment '揽装人工号'
+,salestaff_code          comment '揽装人编码'
+,salestaff_name          comment '揽装人姓名'
+,salestaff_org_name0     comment '揽装人所属机构'
+,load_date               comment '装载日期'
+)
+as
+select
+seq_id
+,acc_nbr
+,action_name
+,subs_code
+,act_date
+,subs_stat_date
+,salestaff_id 
+,salestaff_code
+,salestaff_name
+,salestaff_org_name0
+,load_date
+from zone_gz_yz.tmp_XQGZ2026061501101_final;
+
+
+已提取附件号码能提取到的基本订单清单，请在CDAP平台自助分析模块中查询结果清单：
+select * from zone_gz.tmp_view_by_XQGZ2026061501101
+若要锁定办理拆机停机的，请限定条件：where action_name like '%注销%' or action_name like '%停%' 
+查看字段描述: desc zone_gz.tmp_view_by_XQGZ2026061501101
+提醒：临时需求数据会被定期清理，请注意及时使用，如有疑问请及时沟通，谢谢！
+========================================================【生产视图赋权及回单】
+

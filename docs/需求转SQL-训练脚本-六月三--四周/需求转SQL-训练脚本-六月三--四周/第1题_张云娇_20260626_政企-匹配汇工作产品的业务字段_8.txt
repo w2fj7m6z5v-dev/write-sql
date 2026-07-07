@@ -1,0 +1,232 @@
+
+工单编号 XQGZ2026062501773 需求标题 匹配汇工作产品的业务字段 需求关键词 匹配汇工作产品的业务字段 
+提交人 v-梁俊杰 提交人电话 18926152801,02034213070 提交部门 广东公司/市分公司/广州分公司/政企客户部/临-外部组织/临-行业拓展团队 
+提交日期 2026-06-25 15:57:22  
+需求描述 根据省公司《关于开展微派汇工作产品专项检查的通知》要求，广州需要对汇工作存量用户的发展真实性进行自查，现提取对应的业务字段，请领导审批，谢谢！ 
+需求目标 匹配汇工作产品的业务字段 
+
+李倩安排：请娇姐协助提取附件号码除【接入号的欠费金额、接入号的欠费月份数（欠了多少个月）】外的其他字段数据，完成后反馈结果表转营收团队处理欠费数据，请营收团队帮忙提取欠费字段，谢谢。 
+======================================================
+--附件字段
+序号
+地市
+客户名称
+空列
+客户编码
+接入号码
+订购产品
+CRM订单编码
+CRM订单日期
+订购方式
+揽装人姓名
+揽装人工号
+揽装人联系方式
+揽装网点
+揽装人所属机构
+受理人
+受理机构
+----需要匹配的信息
+接入号划小局向
+接入号划小营服
+接入号号码状态
+接入号的欠费金额---------------------------------转营收团队处理
+接入号的欠费月份数（欠了多少个月）----------------转营收团队处理
+接入号入网订单编码
+接入号的第一协销人
+接入号退订时间（如有）
+
+--导入附件信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260625_fj purge;
+create table if not exists zone_gz_yz.tmp_XQGZ20260625_fj
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select 
+index1 as fj_seq_id--序号
+,index2 as fj_city_name--地市
+,index3 as fj_cust_name--客户名称
+--,index4 as --第4列置空
+,index5 as fj_cust_nbr--客户编码
+,index6 as fj_acc_nbr--接入号码
+,index7 as fj_offer_name--订购产品
+,index8 as fj_subs_code--CRM订单编码
+,index9 as fj_subs_stat_date--CRM订单日期
+,index10 as fj_action_name--订购方式
+,index11 as fj_salestaff_name--揽装人姓名
+,index12 as fj_salestaff_code--揽装人工号
+,index13 as fj_salestaff_tel--揽装人联系方式
+,index14 as fj_salestaff_channel--揽装网点
+,index15 as fj_salestaff_org_name--揽装人所属机构
+,index16 as fj_staff_name--受理人
+,index17 as fj_org_name--受理机构
+from zone_gz_yz.zone_gz_yz_xxxxx;
+
+
+select count(1) from zone_gz_yz.tmp_XQGZ20260625_fj;--7891
+select * from zone_gz_yz.tmp_XQGZ20260625_fj;
+
+
+=================================================
+接入号划小局向
+接入号划小营服
+接入号号码状态
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+drop table if exists zone_gz_yz.tmp_XQGZ20260625_serv purge;
+create table if not exists zone_gz_yz.tmp_XQGZ20260625_serv
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select distinct b.serv_id,b.acc_nbr,b.open_date,b.subst_id,b.subst_name,b.branch_id,b.branch_name--划小局向划小营服
+,b.state,d.attr_value_name as state_desc--使用状态
+,b.wl_cancel_subs_stat_date
+,b.subs_code--接入号入网订单编码不全！
+from zone_gz_yz.tmp_XQGZ20260625_fj as a
+join zone_gz_yz.dwm_yz_tb_comm_cm_all_final as b on a.fj_acc_nbr=b.acc_nbr and b.par_month_id=202606
+left join dws_crm_cfguse.dws_attr_value as d on b.state=d.attr_inner_value and d.attr_id='4000000201' and d.city_id='200'--使用状态
+union 
+select distinct b.serv_id,b.acc_nbr,b.open_date,b.subst_id,b.subst_name,b.branch_id,b.branch_name--划小局向划小营服
+,'110000' as state,'已拆机' as state_desc--使用状态
+,b.wl_cancel_subs_stat_date
+,b.subs_code--接入号入网订单编码不全！
+from zone_gz_yz.tmp_XQGZ20260625_fj as a
+join zone_gz_yz.dwm_yz_tb_comm_cm_all_mon_final as b on a.fj_acc_nbr=b.acc_nbr and b.par_month_id>=202203 and is_wl_cancel_user=1
+;
+
+select count(1) from zone_gz_yz.tmp_XQGZ20260625_serv;--7891
+select * from zone_gz_yz.tmp_XQGZ20260625_serv;
+select count(1) from zone_gz_yz.tmp_XQGZ20260625_serv where subs_code is not null;
+
+
+--匹配
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260625_001 purge;
+create table if not exists zone_gz_yz.tmp_XQGZ20260625_001
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select a.*
+,b.serv_id,b.open_date,b.subst_id,b.subst_name,b.branch_id,b.branch_name--划小局向划小营服
+,b.state,b.state_desc,b.wl_cancel_subs_stat_date--使用状态拆机时间
+from zone_gz_yz.tmp_XQGZ20260625_fj as a
+left join zone_gz_yz.tmp_XQGZ20260625_serv as b on a.fj_acc_nbr=b.acc_nbr
+;
+
+
+select count(1) from zone_gz_yz.tmp_XQGZ20260625_001;--7891
+select count(1) from zone_gz_yz.tmp_XQGZ20260625_001 where serv_id is null;--0
+select * from zone_gz_yz.tmp_XQGZ20260625_001;
+
+===================================================================================================
+--提取订购订单编码及协销人工号
+--4.1、历史基本订单信息：
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_xqgz_ddhc_ba_subs_hist;
+create table if not exists zone_gz_yz.tmp_xqgz_ddhc_ba_subs_hist as 
+select distinct 
+a.serv_id,a.acc_nbr,a.subs_id,a.subs_code
+,a.salestaff_id,e.staff_code as salestaff_code,e.staff_name as salestaff_name
+,a.xx_salestaff_id1,a.xx_salestaff_code1,a.xx_salestaff_name1
+,a.xx_salestaff_id2,a.xx_salestaff_code2,a.xx_salestaff_name2
+from zone_gz_yz.dwm_yz_rpt_comm_ba_subs_mon_final as a
+join zone_gz_yz.tmp_XQGZ20260625_fj as aa on aa.fj_acc_nbr=a.acc_nbr
+left join dws_crm_cfguse.dws_staff as e on a.salestaff_id=e.staff_id and e.city_id in ('0','93','200')
+where a.subs_stat_reason not in ('1200','1300', '002','004')--剔除撤单和作废
+  and a.subs_stat in ( '301200', 'S0C')--'完工'
+  and a.action_type='NEW'
+  ;
+
+
+--==========================================================
+--4.3、当前基本订单信息：
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_xqgz_ddhc_ba_subs;
+create table if not exists zone_gz_yz.tmp_xqgz_ddhc_ba_subs as 
+select distinct 
+a.serv_id,a.acc_nbr,a.subs_id,a.subs_code
+,a.salestaff_id,e.staff_code as salestaff_code,e.staff_name as salestaff_name
+,a.xx_salestaff_id1,a.xx_salestaff_code1,a.xx_salestaff_name1
+,a.xx_salestaff_id2,a.xx_salestaff_code2,a.xx_salestaff_name2
+from zone_gz_yz.dwm_yz_rpt_comm_ba_subs_final as a
+join zone_gz_yz.tmp_XQGZ20260625_fj as aa on aa.fj_acc_nbr=a.acc_nbr
+left join dws_crm_cfguse.dws_staff as e on a.salestaff_id=e.staff_id and e.city_id in ('0','93','200')
+where a.subs_stat_reason not in ('1200','1300', '002','004')--剔除撤单和作废
+  and a.subs_stat in ( '301200', 'S0C')--'完工'
+  and a.action_type='NEW'
+;
+
+
+set hive.fetch.task.conversion=none;
+select count(1) from zone_gz_yz.tmp_xqgz_ddhc_ba_subs;--0
+select count(1) from zone_gz_yz.tmp_xqgz_ddhc_ba_subs_hist;
+
+--==========================================================
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260625_002 purge;
+create table if not exists zone_gz_yz.tmp_XQGZ20260625_002
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select a.*
+,b.subs_code,b.salestaff_code,b.salestaff_name
+,b.xx_salestaff_code1,b.xx_salestaff_name1--接入号订购的第一协销人
+from zone_gz_yz.tmp_XQGZ20260625_001 as a
+left join zone_gz_yz.tmp_xqgz_ddhc_ba_subs_hist as b on a.serv_id=b.serv_id;
+
+
+
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.ads_XQGZ20260625 purge;
+create table if not exists zone_gz_yz.ads_XQGZ20260625
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select 
+fj_seq_id,fj_city_name,fj_cust_name,fj_cust_nbr,fj_acc_nbr,fj_offer_name,fj_subs_code,fj_subs_stat_date,fj_action_name,
+fj_salestaff_name,fj_salestaff_code,fj_salestaff_tel,fj_salestaff_channel,fj_salestaff_org_name,fj_staff_name,fj_org_name,
+serv_id,open_date,subst_id,subst_name,branch_id,branch_name,state,state_desc,wl_cancel_subs_stat_date as hist_create_date,
+subs_code,salestaff_code,salestaff_name,xx_salestaff_code1,xx_salestaff_name1,current_timestamp as load_date
+from zone_gz_yz.tmp_XQGZ20260625_002
+;
+
+
+转营收团队安排欠费信息的提取。
+生产团队匹配结果表：zone_gz_yz.ads_XQGZ20260625
+fj_开头的字段是需求附件内容，后面匹配的字段及描述如下：
+serv_id--号码服务标识
+open_date--号码开通时间
+subst_name--号码划小局向
+branch_name--号码划小营服
+state_desc--号码使用状态
+hist_create_date--号码拆机时间
+subs_code--号码订购订单编码
+salestaff_code--号码订购揽装工号
+salestaff_name--号码订购揽装人名称
+xx_salestaff_code1--号码订购协销1工号
+xx_salestaff_name1--号码订购协销1名称
+
+请营收团队协助安排欠费字段信息的提取，谢谢。

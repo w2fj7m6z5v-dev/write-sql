@@ -1,0 +1,59 @@
+需求原始内容：
+XQGZ2026011400385
+
+需求描述 达信大厦签约驻地网分成协议，合同编号为：GDGZA2305610CGN00，网点编码：4401043080628，根据营服及分公司业务发展需要，洽谈签约相关补充协议，需提供该客户网格200031556828（达信大厦）最近3年的数据，现申请提取2023-2025年该网格全业务收入，宽带数据。（参考需求单号；XQGZ2025032800685）。 
+
+
+需求梳理：
+按照每月税前确认收入、固话入网、固话到达、宽带入网、宽带到达一共五个字段，取该网格的23-25年每月数据。每月税前确认收入是看网格的总收入，不用限定产品。
+
+输出字段：
+统计月份、确认收入、固话入网、固话到达、宽带入网、宽带到达
+
+
+
+-- 统计收入
+drop table if exists tmp_XQGZ2026011400385_01;
+create table tmp_XQGZ2026011400385_01 as 
+select par_month_id,cell_code,cell_name,sum(a0_sq) as sq_sr
+from dwm_srhx_serv_list_mon_final
+where par_month_id between '202301' and '202512' and cell_code ='200031556828' 
+group by par_month_id,cell_code,cell_name order by par_month_id;  
+
+-- 检查数目
+select * from tmp_XQGZ2026011400385_01; -- 36
+
+-- 统计入网量
+drop table if exists tmp_XQGZ2026011400385_02;
+create table tmp_XQGZ2026011400385_02 as 
+select par_month_id,cell_code,cell_name,case when is_new_user=1 and prod_type=10 then '固话入网'
+when is_new_user=1 and prod_type=40 then '宽带入网'
+else '其他' end as serv_type,
+count(distinct serv_id)
+from dwm_yz_tb_comm_cm_all_mon_final
+where par_month_id between '202301' and '202512'
+and cell_code ='200031556828' and prod_type in ('10','40') and is_new_user=1 
+group by par_month_id,cell_code,cell_name,case when is_new_user=1 and prod_type=10 then '固话入网'
+when is_new_user=1 and prod_type=40 then '宽带入网'
+else '其他' end;
+
+-- 检查数目
+select * from tmp_XQGZ2026011400385_02 order by par_month_id; -- 18
+
+-- 统计到达量
+drop table if exists tmp_XQGZ2026011400385_03;
+create table tmp_XQGZ2026011400385_03 as 
+select par_month_id,cell_code,cell_name,case when is_cancel_user=0 and is_cz=1 and prod_type=10 then '固话到达'
+when is_cancel_user=0 and is_cz=1 and prod_type=40 then '宽带到达'
+else '其他' end as serv_type,
+count(distinct serv_id)
+from dwm_yz_tb_comm_cm_all_mon_final
+where par_month_id between '202301' and '202512'
+and cell_code ='200031556828' and prod_type in ('10','40') and is_cancel_user=0 and is_cz=1
+group by par_month_id,cell_code,cell_name,case when is_cancel_user=0 and is_cz=1 and prod_type=10 then '固话到达'
+when is_cancel_user=0 and is_cz=1 and prod_type=40 then '宽带到达'
+else '其他' end;
+
+-- 检查数目
+select * from tmp_XQGZ2026011400385_03 order by par_month_id; -- 72
+
