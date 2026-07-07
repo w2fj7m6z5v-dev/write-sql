@@ -1,0 +1,71 @@
+name: PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  mechanical-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 获取变更文件列表
+        id: changed-files
+        run: |
+          git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }}...HEAD > /tmp/changed_files.txt
+          echo "=== 变更文件 ==="
+          cat /tmp/changed_files.txt
+
+      - name: 双入口一致性检查
+        run: bash scripts/sync_skills.sh check
+
+      - name: SQL 静态审计
+        run: |
+          SQL_FILES=$(grep '\.sql$' /tmp/changed_files.txt || true)
+          if [ -z "$SQL_FILES" ]; then
+            echo "没有 SQL 文件变更，跳过审计。"
+            exit 0
+          fi
+          HAS_RISK=0
+          for f in $SQL_FILES; do
+            if [ -f "$f" ]; then
+              echo "::group::审计 $f"
+              python .claude/skills/write-query/scripts/audit_sql.py "$f" --format text || HAS_RISK=1
+              echo "::endgroup::"
+            fi
+          done
+          if [ $HAS_RISK -ne 0 ]; then
+            echo "::error::发现 SQL 风险项，请修复后重新提交。"
+            exit 1
+          fi
+
+      - name: METRIC_INDEX 引用校验
+        run: |
+          METRIC_FILES=$(grep 'METRIC_INDEX\.md$' /tmp/changed_files.txt || true)
+          if [ -z "$METRIC_FILES" ]; then
+            echo "METRIC_INDEX.md 未变更，跳过校验。"
+            exit 0
+          fi
+          LINT_TARGET=$(echo "$METRIC_FILES" | head -1)
+          echo "校验 $LINT_TARGET ..."
+          python .claude/skills/write-query/scripts/lint_metric_index.py --index "$LINT_TARGET"
+
+      - name: Skills 目录同步校验
+        run: |
+          SKILL_FILES=$(grep -E '^\.(agents|claude)/skills/' /tmp/changed_files.txt || true)
+          if [ -z "$SKILL_FILES" ]; then
+            echo "Skills 目录未变更，跳过同步校验。"
+            exit 0
+          fi
+          echo "检测到 Skills 文件变更，校验双入口一致性..."
+          bash scripts/sync_skills.sh check

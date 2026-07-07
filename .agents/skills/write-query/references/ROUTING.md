@@ -97,6 +97,8 @@ runtime: true
 | 终端自注册机型 / 终端制式 / 手机厂商 / IMEI / IMSI | 终端自注册信息 | 附件号码或 069 `acc_nbr` → 123 终端自注册清单 | `acc_nbr`；输出 `terminal_type/brand_type/factory/brand/register_time/imsi/imei1/imei2` | 与 119 设备资源不同；一号一行默认按 `register_time` 取最新 |
 | 新装 / 入网 | 新入网规模 | 069 全业务资料表 | `is_new_user=1`、`open_date`、`subs_id` | 宽带、移动、固话及其它产品入网量默认都走 069 |
 | 快捷宽带 / 快宽 | 快捷宽带产品入网 | 069 全业务资料表 | `prod_type3='快捷宽带'`；入网量用标准指标 M-BASIC-BB-008 | 入网积分 `sum(jz_points)`，同主表同条件 |
+| FTTR 入网号码 / FTTR 清单 | FTTR 设备入网号码 | 002 fttr清单 `dwm_fttr_list` | `par_month_id` + `serv_id`/`acc_nbr`；FTTR 入网月 `substr(create_date,1,6)=par_month_id`；需回 069 验证 `rh_type_ykj`、补在网/状态字段 | FTTR 中包含非宽带号码，FTTR 入网月不一定等于号码入网月；002 含 `is_fttr/is_fttr_gz/is_fttr_sq` 区分版本 |
+| 合约入网号码 / 合约清单 | 合约办理入网号码 | 004 合约清单 `dwm_yz_cm_cdma_hy_final` | `par_month_id` + `serv_id`/`acc_nbr`；需回 069 验证 `rh_type_ykj`、补在网/状态字段；`data_type` 区分合约/协议 | 合约类型看 `data_type`（合约/协议）；终端自注册信息/IMEI 可从 004 直接取，不绕 123 |
 | 到达 / 在网 / 出账 | 存量状态 | 069 全业务资料表 | `is_cz`、`is_cancel_user`、`is_online_user` | 规模类口径；**用户说「状态」见下行** |
 | 状态 / 号码状态 / 用户状态 | 服务状态码 + 中文名 | 069 全业务资料表 | **`state`**（码值）；中文 **`dws_attr_value.attr_value_name`**（`attr_id='4000000201'`） | **默认字段是 `state`，不是 `is_cancel_user` 等**；交付需 **码值 + 中文名**；详见 `FIELD_BACKFILL.md`、`VC-20260520-002` |
 | VPN 群号 / 集团 VPN / 校园 VPN 号码 | VPN 群下移动号码 | 069 全业务资料表 | `vpn_value`；移动号码常加 `prod_type=30`，在网常加 `is_cancel_user=0` | VPN 群号由需求方给定，不沉淀具体群号；圈出 `serv_id/acc_nbr` 后可接销售品、收入、终端、积分等标签 |
@@ -140,6 +142,9 @@ runtime: true
 | 年龄客群 + 订单明细 | 当前年龄圈人后看历史订单 | 069 当前最新资料月圈 `serv_id` → 040/041 订单池 | 年龄用 069 `social_id/social_id_type`；订单业务时间用 `act_date` 或 `subs_stat_date` | 年龄快照与订单业务时间是两套口径；不要按订单发生月回溯年龄，除非用户明确要求 |
 | 价值积分 | 当月价值积分 | 069 | `jz_points` | 已分摊 |
 | 积分类数据 / 积分明细 / 全量积分 | 发展存量积分全量底表 | 012 发展存量积分清单 | `prod_name1-10`、`acc_nbr`、`serv_id`、`cust_nbr/cust_name`、`jz_points/jl_points`、`jz_points_desc/jl_points_desc` | 默认走 `ads_yz_score_all_list`；只有明确点名专项表/专项口径时才走 081 等派生表 |
+| 政企全光组网 / 全光组网发展量 | FTTR-B + 小翼主从网关 + 高阶网关三张专项清单 | 002 FTTR清单（商企版 `is_fttr_sq=1`）；137 小翼发展清单；138 高阶网关发展清单 | 三表各自独立统计，不跨表 JOIN | 不要用 069 全业务资料表替代；不要用 041 优惠订单表替代 |
+| 小翼主从网关 | 小翼专项清单 | 137 小翼发展清单 `ads_yz_zqb_xyqg` | `offer_name RLIKE '主网关\|从网关'`；`subs_stat='完工'`；竣工时间 `subs_stat_date` | 不要与 FTTR(002) 或高阶网关(138) 混用 |
+| 高阶网关 | 高阶网关专项清单 | 138 高阶网关发展清单 `ads_yz_wyh_gjwg_new_list` | `cj_type2 IN ('主网关','从网关')`；竣工时间 `subs_stat_date` | 不要与 FTTR(002) 或小翼(137) 混用 |
 
 ## 时间字段语义
 
@@ -222,7 +227,7 @@ runtime: true
 | 商企/政企入网量 | 069 全业务资料表 | 022 商企入网清单；036 政企移动入网清单 | 直接按客群名切专项表 | 问“量/规模”默认 069；明确要商企/政企专项清单字段时再用专项表 |
 | 双线数据 / 互联网专线 / 组网专线 | 069 全业务资料表 `dwm_yz_tb_comm_cm_all_final` | 033 双线全量清单补月租 `yz_cs`、双线专项字段；已补 033 时也可取 033 `speed_value` | 只因要双线速率就切到 033 | 双线定义看 069 `prod_type2 IN (60,70,71)`；速率 069/033 均可，按查询主路径选择 |
 | 群端 / 主从 AZ / A-B 端关系 | 用户附件种子表；附件只有群号/群端接入号、成员号码或子端接入号时先 069 补 `serv_id` | 120 产品关联关系表、121 业务关联关系表；必要时回 069 补另一端 `acc_nbr`，再接 047/117/048 收入 | 仅用 033 `grp_acc_nbr` 反推 CRM A/Z 关系 | 关系表支持双向使用：输入群端或主端服务后，用 `a_prod_inst_id -> z_prod_inst_id` 找同组子端服务；输入成员/子端服务后，用 `z_prod_inst_id -> a_prod_inst_id` 反查所属群端/主端服务。两张关系表需 `city_id='200'`，合并后先按 `a_prod_inst_id,z_prod_inst_id` 去重；不要默认按 `z_prod_inst_id` 排序就是业务 A/B 端，需输出明细或确认排序口径 |
-| 全量科目级收入 / 按 SR 科目取税后收入 | 048 全量科目级收入 `dwm_srhx_src_income_list_mon` | 用户科目维表（如 `due_income_code23/24/25` 分列） | 047（无 `due_income_code`）、069 收入标志 | 账期字段 **`month_id`**；最新月可用 `dwm_srhx_src_income_list`，历史月/多账期用 `_mon`；度量 `sum(fee_all)`；详见 `verified-cases/VC-20260520-001` |
+| 全量科目级收入 / 按 SR 科目取税后收入 | 048 全量科目级收入 `dwm_srhx_src_income_list_mon` | 用户科目维表（如 `due_income_code23/24/25` 分列） | 047（无 `due_income_code`）、069 收入标志 | 账期字段 **`month_id`**；度量 `sum(fee_all)`；详见 `verified-cases/VC-20260520-001` |
 | 项目/客户号码圈定后查账目项收入明细 | 069 全业务资料表先圈 `serv_id` | 048 全量科目级收入取 SR 科目、收入来源、账目项、税后收入 | 069 的 `fee` / `fee_new_tax` 直接当账目项明细 | 先按客户名、产品分类、号码清单等在 069 圈服务标识，再按 `serv_id + month_id` 查 048；用户要 `due_income_name/due_type/data_src_name/col_income_name/acct_item_type_name/fee_all` 时走此路径 |
 | 划小收入 | 047 最终版划小收入 | 指标 SQL 指定表 | 069 | 收入事实表优先 |
 | 实收金额 / 客户清单基本面·产数收入 / 先圈号再查收入 | 117 实收；或 047 划小收入 | 069/033 等圈定；用户附件 | 047/048/069 替代 117 实收；097 替代客户清单 047 | 步骤见 **§专项场景索引**（SC-009） |
@@ -237,6 +242,7 @@ runtime: true
 | 发展积分 / 存量积分 | 012 发展存量积分清单 `ads_yz_score_all_list` | 指标 SQL 指定表 | 069 | 发展/存量积分均从全量积分底表按 `prod_name1-10` 等积分类型字段筛选 |
 | 揽装积分专项表口径 | 081 揽装积分清单 `ads_yz_lyf_lz` | 012 全量积分底表 | 未明确专项表或 `ads_yz_lyf_lz` 口径时不要选 081 | 只有用户明确点名揽装积分专项表、揽装积分清单专项口径或 `ads_yz_lyf_lz` 时才走 |
 | 降档明细 | 104 降档清单 | 010 降档原始清单；011 降档动作订单清单 | - | 按明细/动作区分 |
+| 政企全光组网发展量 / FTTR-B发展量 / 小翼发展量 / 高阶网关发展量 | 002 FTTR清单（商企版 `is_fttr_sq=1`）；137 小翼发展清单；138 高阶网关发展清单 | 各自独立统计，需要时 UNION ALL 合并 | 069 全业务资料表；041 优惠订单表 | 三表均为专项清单，各自按主网关/从网关口径统计；FTTR-B 主网关 `count(eqpt_sn)`、从网关 `sum(sqb_xzs)`；小翼按 `offer_name` 区分主从；高阶按 `cj_type2` 区分主从 |
 
 ## 找不到路由时
 

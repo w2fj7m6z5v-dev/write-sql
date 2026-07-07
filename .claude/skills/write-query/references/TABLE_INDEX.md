@@ -74,7 +74,7 @@
 | 042 | 号码协销表 | zone_gz_yz.dwd_yz_cm_obj_xx_final | zone_gz_yz.dwd_yz_cm_obj_xx_final；zone_gz_yz.dwd_yz_cm_obj_xx_mon_final（月表） | tables/042_号码协销表.md | 服务粒度协销人信息 | par_month_id（月表） | 按 `serv_id` 回填第一协销人/第二协销人（第二发展人/第三发展人）；历史账期用月表，当前用日表 | 不要用于订单粒度协销；订单已有 `subs_id` 时优先看 043 |
 | 043 | 订单协销表 | zone_gz_yz.dwd_yz_ba_obj_xx_final | zone_gz_yz.dwd_yz_ba_obj_xx_final | tables/043_订单协销表.md | 订单粒度协销人信息；按订单项与发展人类型分行 | par_month_id | 按订单 `subs_id = order_item_id` 回填第一协销人/第二协销人；`dev_staff_type='2000'/'3000'` | 本表没有月表；不要用于只有 `serv_id`、无订单键的服务清单 |
 | 047 | 最终版划小收入 | dwm_srhx_serv_list_mon | dwm_srhx_serv_list_mon_final | tables/047_最终版划小收入.md | 服务/月收入明细，可按 `cust_nbr` 汇总到客户级 | par_month_id | 划小收入、客户清单基本面/产数（`fee_fm_new`/`fee_cs`）；编排见 `scenarios/SC-009` | 不要用 069 费用字段替代；标准指标口径见 097/metrics |
-| 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md | 服务/号码级科目收入明细 | month_id | 全量科目级收入、按 SR 科目/due_income_code 取税后收入 sum(fee_all)；最新月表 `dwm_srhx_src_income_list` 只放最新收入月份 | 字段名相似但业务事实不在本表时不要选；划小收入汇总用 047；历史月/多账期用 `_mon` |
+| 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md | 服务/号码级科目收入明细 | month_id | 全量科目级收入、按 SR 科目/due_income_code 取税后收入 sum(fee_all) | 字段名相似但业务事实不在本表时不要选；划小收入汇总用 047 |
 |049|欠费日清单|ads_ys_lst_qf_pushdata_daily_bss|ads_ys_lst_qf_pushdata_daily_bss|tables/049_欠费日清单.md|||-|-||
 |050|宽带到达套餐收入清单|zone_gz_yz.ads_yz_kddd_tcsr_list|zone_gz_yz.ads_yz_kddd_tcsr_list|tables/050_宽带到达套餐收入清单.md||par_month_id|-|-||
 |051|小业务收入多维表|zone_gz_yz.ads_yz_ict_all_ydxyw_sr_LIST|zone_gz_yz.ads_yz_ict_all_ydxyw_sr_LIST|tables/051_小业务收入多维表.md||par_month_id|-|-||
@@ -153,4 +153,6 @@
 | 134 | 银行表 | dws_crm_cfguse.dws_tb_cm_bank | dws_crm_cfguse.dws_tb_cm_bank | tables/134_银行表.md | 银行维度；以 `bank_id` 为核心 |  | 按银行 ID 回填银行中文名称 `bank_name` | 不承载服务、账户或支付方案事实；码值/本地网过滤需确认 |
 | 135 | 敏感客户黑名单表 | dws_crm_party.dws_special_list_black | dws_crm_party.dws_special_list_black | tables/135_敏感客户黑名单表.md | 黑名单条目粒度；以 `obj_id`（客户级）或 `cert_nbr`（证件级）为核心 |  | 客户级/证件级敏感黑名单判断；`special_type='1200'`、`status_cd='1000'`；按 `obj_type` 区分客户级(`1100`)/证件级(`1500`)，取最新 `create_date` | 不要与 122 名单制管控清单混用；证件级黑名单需经 136 证件本地表→108 产权客户表才能得到 `cust_id` |
 | 136 | 证件本地表 | dws_crm_cust.dws_party_cert_local | dws_crm_cust.dws_party_cert_local | tables/136_证件本地表.md | party_id + cert_type + cert_num 粒度 |  | 按证件号（身份证 `cert_type='1'`）反查 `party_id`，再经 108 产权客户表获取 `cust_id` | 不要替代 069 的 `social_id` 字段做常规查询；常规证件号→服务对象直接用 069 |
-| 137 | OP人员信息表 | ads_yz.ads_yz_dim_op_final | ads_yz.ads_yz_dim_op_final | tables/137_OP人员信息表.md | OP人员粒度，当前月+历史月合并 | par_month_id | 查询OP人员薪酬岗位、531薪酬统计、天河分公司等各分公司OP人员信息 | 非OP体系人员不要查本表；揽装人信息用 111/113 |
+| 137 | 小翼发展清单 | zone_gz_yz.ads_yz_zqb_xyqg | zone_gz_yz.ads_yz_zqb_xyqg | tables/137_小翼发展清单.md | 服务/销售品粒度 | par_month_id | 政企全光组网-小翼主从网关发展量统计；按 `offer_name RLIKE '主网关\|从网关'` 区分主从网关 | 不要与 002 FTTR 清单或 138 高阶网关清单混用 |
+| 138 | 高阶网关发展清单 | zone_gz_yz.ads_yz_wyh_gjwg_new_list | zone_gz_yz.ads_yz_wyh_gjwg_new_list | tables/138_高阶网关发展清单.md | 服务粒度 | par_month_id | 政企全光组网-高阶网关主从网关发展量统计；按 `cj_type2` 区分主网关/从网关 | 不要与 002 FTTR 清单或 137 小翼清单混用 |
+| 139 | OP人员信息表 | ads_yz.ads_yz_dim_op_final | ads_yz.ads_yz_dim_op_final | tables/139_OP人员信息表.md | OP人员粒度，当前月+历史月合并 | par_month_id | 查询OP人员薪酬岗位、531薪酬统计、天河分公司等各分公司OP人员信息 | 非OP体系人员不要查本表；揽装人信息用 111/113 |
