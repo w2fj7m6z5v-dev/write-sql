@@ -45,15 +45,16 @@ Before asking the user anything:
 2. Read only the needed `write-query` references:
    - `ROUTING.md` for user language, scene-to-table routing, and “do not choose” traps.
    - `TABLE_INDEX.md` and matching `tables/*.md` for candidate table names, partitions, grain, and field availability.
-   - `METRIC_INDEX.md` and matching `metrics/*.md` when the case expresses a stable standard metric.
+   - `METRIC_INDEX.md` and matching `metrics/*.md` when the case expresses a stable standard metric or classification caliber.
    - `FIELD_BACKFILL.md` for missing-field joins, keys, filters, and row-count risks.
    - `RULES.md` for SQL generation/review rules, attachment handling, de-duplication, time windows, pivoting, and masking.
    - `scenarios/INDEX.md` only when the case looks like a reusable complex scenario.
    - `verified-cases/INDEX.md` only when a concrete reusable SQL flow may warrant or match a verified case.
 3. Check whether the knowledge already exists. Do not duplicate an existing rule under a new name.
 4. Check whether `write-query` can already implement the case end to end. "Can implement" means the current references can identify the business scene, choose the main table, map required fields, plan joins/backfills, apply filters/time口径, and audit the SQL without adding new stable knowledge.
-5. If existing general `write-query` routing, table docs, field backfill, scenarios, verified cases, and audit rules already cover the case, do not propose new sedimentation; explain the existing reusable path and any remaining case-specific parameters.
-6. If the existing skill can implement the case but the source SQL contains old or risky patterns, treat those patterns as review evidence, not new knowledge. Point to the existing rule that would correct them.
+5. **检查分类口径缺失**：如果案例中出现了 `prod_type + is_rh_ykj` 组合（如 `prod_type=30 AND is_rh_ykj=0` 表意"单移"），检查 `METRIC_INDEX.md` 的「分类口径」分区是否已定义。若缺失，标记为"待沉淀"，不判为"已覆盖不写入"。
+6. If existing general `write-query` routing, table docs, field backfill, scenarios, verified cases, and audit rules already cover the case, do not propose new sedimentation; explain the existing reusable path and any remaining case-specific parameters.
+7. If the existing skill can implement the case but the source SQL contains old or risky patterns, treat those patterns as review evidence, not new knowledge. Point to the existing rule that would correct them.
 
 Do not read or edit archived runtime-disabled files unless the user explicitly asks for historical traceability.
 
@@ -90,6 +91,7 @@ Use this tree when proposing edits:
 | 用户说法、业务场景、主表选择、不应误选表 | `ROUTING.md` | `TABLE_INDEX.md` as long routing prose |
 | 新稳定表、Hive 名、粒度、分区、字段 | `TABLE_INDEX.md` + `tables/*.md` | `ROUTING.md` as table metadata |
 | 标准指标名、同义词、技术口径 SQL | `METRIC_INDEX.md` + `metrics/*.md` | `ROUTING.md` or `RULES.md` as long formulas |
+| 分类口径（产品大类/状态标签等） | `METRIC_INDEX.md`「分类口径」分区 + `metrics/分类/` | `ROUTING.md` or `tables/` as per-table notes |
 | 主表缺字段的通用 JOIN | `FIELD_BACKFILL.md` | `ROUTING.md` as detailed join steps |
 | 通用 SQL 审计、反模式、附件核数、去重、打横、脱敏 | `RULES.md` | `verified-cases/` as generic rules |
 | 复杂多步专项流程、固定 CTAS 编排、自检 | `scenarios/SC-*.md` + `scenarios/INDEX.md` | `ROUTING.md` / `RULES.md` as long flow |
