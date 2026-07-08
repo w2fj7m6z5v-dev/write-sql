@@ -118,6 +118,7 @@ runtime: true
 | 营服 / 所属营服 | **划小营服**（默认） | 主表机构字段 | 048/047/069 等：`branch_id`、`branch_name` | 默认「营服」= 号码划小营服；用户说**揽装营服**时，069 取 `channel_branch_name`（网点所属营服） |
 | 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 / 040 / 041 等主表机构字段 | `subst_id`、`subst_name`、`branch_id`、`branch_name`、`grid_name` | 与落地局向、揽装机构均不同；划小体系下网格用 `grid_name`，不是 `cell_name` |
 | 揽装分局 / 揽装局向 | 网点所属区县（069） | 069 全业务资料表 | `channel_subst_name` | 口语叫法有时不标准，即字段文档「网点所属区县」；≠ 划小分局 `subst_name`；订单表等用 `salestaff_subst_*` + 018 |
+| 揽装人工号 → 揽装分局 / 揽装局向 | 按揽装人工号 + 月份补网点所属分局 | 附件 `sales_code` + 竣工月份 → 113 揽装所属表月表 | `sales_code = 113.sales_code`、`par_month_id` 对齐；`status_cd='1000'` 有效；输出 `subst_name` | 适用于附件已有揽装人工号但缺揽装局向的场景；`sales_code` 不唯一，113 侧必须 `distinct` 去重；当前月表快照用日表 `dwd_yz_sales_man_outlers_final` |
 | 揽装营服 | 网点所属营服（069） | 069 全业务资料表 | `channel_branch_name` | 口语叫法有时不标准，即字段文档「网点所属营服」；≠ 划小营服 `branch_name`；订单表等用 `salestaff_branch_*` + 018 |
 | 落地局向 / 标准落地局向 | 标准落地机构 | 主表机构字段（与划小并行） | `std_subst_id`、`std_subst_name`、`std_branch_id`、`std_branch_name` | 与划小不同，谨慎区分用户语义 |
 | 机构简称 / 营服简称 / 包区简称 | 机构全称 | 018 机构维表 `dwd_yz_dim_org` | `subst_name` + `org_name like '%简称%'`；`levs` 按需求确认（3=分局/4=营服/其他=包区等） | 用户给简称时，必须先查机构维表确认全称，不能硬编码简称进 069 过滤条件；`levs` 不能写死，按需求是分局/营服/包区决定 |
