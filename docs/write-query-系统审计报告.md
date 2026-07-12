@@ -78,7 +78,9 @@
 
 - 严重度：P2
 - 置信度：已确认
+- 状态：已修复，待回归验证
 - 证据：`MAINTENANCE.md:48` 说 `ROUTING.md` 的专项场景索引是唯一表；`ROUTING.md:30` 已明确专项场景唯一索引是 `scenarios/INDEX.md`。
+- 修复内容：双入口维护准则已统一为 `scenarios/INDEX.md` 作为专项场景唯一目录，并明确 `ROUTING.md` / `FIELD_BACKFILL.md` 只保留指针。
 - 影响：新增 SC 时维护者可能错误修改 ROUTING，造成索引重复或专项规则回流核心文件。
 - 建议：保留 `scenarios/INDEX.md` 作为唯一场景目录，并把维护准则、ROUTING 和 `scenarios/INDEX.md` 的表述统一为同一套规则。
 

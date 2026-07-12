@@ -45,8 +45,9 @@ runtime: false
 
 ## 专项场景指针约定
 
-- `ROUTING.md` **§专项场景索引** 是 `SC-001`~`SC-*` 带完整文件路径的**唯一**表。
-- 术语映射 / 主表路由表只写主表 + `见 §专项场景索引（SC-00x）` 或 `见 FIELD_BACKFILL §小节`。
+- `scenarios/INDEX.md` 是 `SC-001`~`SC-*` 带完整文件路径和适用范围的**唯一**目录。
+- `ROUTING.md` 的术语映射 / 主表路由表只写主表 + `见 scenarios/INDEX.md（SC-00x）`；不得在其中复制专项目录。
+- 新增或重命名 `SC-*.md` 时，先更新 `scenarios/INDEX.md`，再检查 `ROUTING.md` / `FIELD_BACKFILL.md` 是否只保留指针。
 - 补表类单一事实源示例：`FIELD_BACKFILL.md` **§销售品参数值（107）**。
 
 ## 提交前检查
