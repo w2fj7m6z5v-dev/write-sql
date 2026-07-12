@@ -30,14 +30,14 @@ runtime: false
 | 码值字典 | `D_experience/dictionaries/{field}.md` | `RULES` 长列表 | 字段码值 → 含义 |
 | 复盘 / 踩坑日志 | `lessons_learned.md` | 运行时 ROUTING/RULES | 只记录过程；经验须反向更新到上表对应文件 |
 | 表字段 / 分区 / 粒度 | `tables/{序号}_{表名}.md` | `ROUTING` | 单表元数据 |
-| 新表登记 | `TABLE_INDEX.md` 一行 | 业务路由长说明 | id / hive / file_path / 简短 use_when |
+| 新表登记 | `TABLE_INDEX.md` 一行 | 业务路由长说明 | id / hive / file_path；适用范围写入 `ROUTING.md` 或表文档 |
 
 ## 不应写进核心文件的内容
 
 | 文件 | 禁止承载 |
 |---|---|
 | `SKILL.md` | 业务口径、表名、码值、SQL 片段、专项补表步骤 |
-| `TABLE_INDEX.md` | 业务路由决策树、补表 JOIN、指标公式 |
+| `TABLE_INDEX.md` | 业务路由决策树、粒度/分区、补表 JOIN、指标公式 |
 | `ROUTING.md` | 专项完整流程、补表三步链、收入公式（指针即可） |
 | `RULES.md` | 专项场景长规则（指针到 SC）、成熟 CTAS 全文 |
 | `FIELD_BACKFILL.md` | 完整 CTAS 专项（应下沉 SC） |
