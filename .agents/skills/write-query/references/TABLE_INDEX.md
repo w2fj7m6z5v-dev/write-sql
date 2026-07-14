@@ -156,3 +156,4 @@
 | 137 | 小翼发展清单 | zone_gz_yz.ads_yz_zqb_xyqg | zone_gz_yz.ads_yz_zqb_xyqg | tables/137_小翼发展清单.md | 服务/销售品粒度 | par_month_id | 政企全光组网-小翼主从网关发展量统计；按 `offer_name RLIKE '主网关\|从网关'` 区分主从网关 | 不要与 002 FTTR 清单或 138 高阶网关清单混用 |
 | 138 | 高阶网关发展清单 | zone_gz_yz.ads_yz_wyh_gjwg_new_list | zone_gz_yz.ads_yz_wyh_gjwg_new_list | tables/138_高阶网关发展清单.md | 服务粒度 | par_month_id | 政企全光组网-高阶网关主从网关发展量统计；按 `cj_type2` 区分主网关/从网关 | 不要与 002 FTTR 清单或 137 小翼清单混用 |
 | 139 | OP人员信息表 | ads_yz.ads_yz_dim_op_final | ads_yz.ads_yz_dim_op_final | tables/139_OP人员信息表.md | OP人员粒度，当前月+历史月合并 | par_month_id | 查询OP人员薪酬岗位、531薪酬统计、天河分公司等各分公司OP人员信息 | 非OP体系人员不要查本表；揽装人信息用 111/113 |
+| 140 | CRM设备订单关系表 | dws_crm_order.dws_ord_prod_res_inst_rel | dws_crm_order.dws_ord_prod_res_inst_rel | tables/140_CRM设备订单关系表.md | 订单与设备资源关系明细；同一order_item_id可能多设备 |  | 按入网订单ID(order_item_id)回填入网时设备机身码(eqpt_sn)；归档表_his UNION ALL当前表；status_cd='1100' | 区别于119号码设备关系表（号码维度当前状态）；本表是订单维度入网时设备；不要用prod_inst_id做主关联键，用order_item_id |
