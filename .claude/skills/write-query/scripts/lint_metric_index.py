@@ -1,7 +1,8 @@
 """
 @file lint_metric_index.py
-@description 校验 METRIC_INDEX.md 中每行的 `metric_file` 和 `table_files`
-             链接的真实存在性。输出 JSON 报告，发现缺失时退出码非零。
+@description 校验 METRIC_INDEX.md 中所有指标表的结构、唯一 ID 和文件链接。
+             同时检查 metrics/ 下是否存在未登记的指标文件。输出 JSON 报告，
+             发现问题时退出码非零。
 
 依赖：Python 3.8+，仅标准库。
 用法：
@@ -17,33 +18,46 @@ from pathlib import Path
 from typing import Any
 
 
-HEADER_PATTERN = re.compile(r"^\|\s*metric_id\s*\|", re.MULTILINE)
+SEPARATOR_CELL = re.compile(r"^\s*:?-{3,}:?\s*$")
 
 
 def parse_metric_index(text: str) -> list[dict[str, str]]:
-    """解析 METRIC_INDEX.md 中的指标行。
+    """解析文档中所有包含 metric_id 的 Markdown 指标表。
 
     返回每行的字段 dict（含 metric_id, metric_name, ..., table_files, metric_file）。
     """
     lines = text.splitlines()
-    header_idx = None
-    for idx, line in enumerate(lines):
-        if line.strip().startswith("| metric_id"):
-            header_idx = idx
-            break
-    if header_idx is None:
-        return []
-
-    header_cols = [c.strip() for c in lines[header_idx].strip("|").split("|")]
     rows: list[dict[str, str]] = []
-    for line in lines[header_idx + 2 :]:
-        stripped = line.strip()
+    idx = 0
+    while idx < len(lines):
+        stripped = lines[idx].strip()
         if not stripped.startswith("|") or not stripped.endswith("|"):
-            break
-        cols = [c.strip() for c in stripped.strip("|").split("|")]
-        if len(cols) != len(header_cols):
+            idx += 1
             continue
-        rows.append(dict(zip(header_cols, cols)))
+
+        header_cols = [c.strip() for c in stripped.strip("|").split("|")]
+        if "metric_id" not in header_cols:
+            idx += 1
+            continue
+        if idx + 1 >= len(lines):
+            break
+
+        separator = [c.strip() for c in lines[idx + 1].strip().strip("|").split("|")]
+        if len(separator) != len(header_cols) or not all(
+            SEPARATOR_CELL.match(cell) for cell in separator
+        ):
+            idx += 1
+            continue
+
+        idx += 2
+        while idx < len(lines):
+            row_line = lines[idx].strip()
+            if not row_line.startswith("|") or not row_line.endswith("|"):
+                break
+            cols = [c.strip() for c in row_line.strip("|").split("|")]
+            if len(cols) == len(header_cols):
+                rows.append(dict(zip(header_cols, cols)))
+            idx += 1
     return rows
 
 
@@ -75,15 +89,32 @@ def lint(index_path: Path) -> dict[str, Any]:
     rows = parse_metric_index(text)
 
     findings: list[dict[str, Any]] = []
-    metric_missing = 0
-    table_missing = 0
+    metric_files: set[str] = set()
+    metric_ids: dict[str, int] = {}
 
-    for row in rows:
+    for row_number, row in enumerate(rows, start=1):
         mid = row.get("metric_id", "")
         metric_file = row.get("metric_file", "").strip()
         table_files = split_table_files(row.get("table_files", ""))
 
+        if not mid:
+            findings.append({"row": row_number, "kind": "metric_id_empty", "severity": "risk"})
+        elif mid in metric_ids:
+            findings.append(
+                {
+                    "metric_id": mid,
+                    "row": row_number,
+                    "kind": "metric_id_duplicate",
+                    "first_row": metric_ids[mid],
+                    "severity": "risk",
+                }
+            )
+        else:
+            metric_ids[mid] = row_number
+
         if metric_file:
+            normalized_metric_file = metric_file.replace("\\", "/").lstrip("./")
+            metric_files.add(normalized_metric_file)
             if not check_path(base_dir, metric_file):
                 findings.append(
                     {
@@ -93,7 +124,6 @@ def lint(index_path: Path) -> dict[str, Any]:
                         "severity": "risk",
                     }
                 )
-                metric_missing += 1
         else:
             findings.append(
                 {
@@ -103,7 +133,6 @@ def lint(index_path: Path) -> dict[str, Any]:
                     "severity": "risk",
                 }
             )
-            metric_missing += 1
 
         for tf in table_files:
             if not check_path(base_dir, tf):
@@ -115,13 +144,28 @@ def lint(index_path: Path) -> dict[str, Any]:
                         "severity": "warn",
                     }
                 )
-                table_missing += 1
+    metrics_dir = base_dir / "metrics"
+    if metrics_dir.exists():
+        actual_metric_files = {
+            str(path.relative_to(base_dir)).replace("\\", "/")
+            for path in metrics_dir.rglob("*.md")
+        }
+        for orphan in sorted(actual_metric_files - metric_files):
+            findings.append(
+                {
+                    "kind": "metric_file_orphan",
+                    "path": orphan,
+                    "severity": "risk",
+                }
+            )
 
     summary = {
         "total_rows": len(rows),
-        "metric_file_missing": metric_missing,
-        "table_file_missing": table_missing,
-        "passed": metric_missing == 0,
+        "metric_id_count": len(metric_ids),
+        "metric_file_count": len(metric_files),
+        "metric_file_actual_count": len(actual_metric_files) if metrics_dir.exists() else 0,
+        "finding_count": len(findings),
+        "passed": not findings,
     }
     return {"summary": summary, "findings": findings}
 

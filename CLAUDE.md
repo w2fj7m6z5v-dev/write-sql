@@ -42,7 +42,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 参考 `claude/skills/write-query/references/TABLE_INDEX.md`，按业务主题（核心事实表、收入表、积分表、维表）查找目标表。
 
 ### Git 提交
-- 本仓库提交信息使用中文描述。
+- 提交信息使用中文，格式优先为“动作 + 范围 + 结果”，简短说明一次逻辑变更。
+- 常用动作：`新增`、`修复`、`完善`、`重构`、`整理`、`沉淀`、`更新`；避免使用“修改代码”“更新文件”等无法说明目的的描述。
+- 一个提交只包含一个逻辑主题；不要把无关的 SQL、文档、依赖或临时文件混入同一提交。
+- 提交前先检查 `git diff --cached --check` 和 `git diff --cached --stat`，确认暂存区只包含本次工作；已有用户改动必须保持未暂存。
+- 修改 `.agents/skills/` 或 `.claude/skills/` 时，提交前必须执行 `bash scripts/sync_skills.sh check`；macOS 的 `.DS_Store` 噪声应单独识别，不能用同步命令覆盖或清理用户文件。
+- 规则或行为变更涉及多个文件时，提交正文可补充“变更原因 / 主要内容 / 验证结果”；简单修复只保留标题即可。
+- 示例：`修复 write-query 同表异轴多指标编排规则`、`完善字段补表与 SQL 占位规则`、`沉淀专线月租表口径`、`重构指标索引校验逻辑`。
 
 ## 工作流程
 

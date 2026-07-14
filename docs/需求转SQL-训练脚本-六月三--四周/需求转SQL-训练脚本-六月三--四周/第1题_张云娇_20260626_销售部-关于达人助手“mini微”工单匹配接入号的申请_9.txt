@@ -1,0 +1,183 @@
+工单编号 XQGZ2026032501270 需求标题 关于达人助手“mini微”工单匹配接入号的申请 需求关键词 mini微 
+提交人 张苏晓 提交人电话 18922189322,02082291780 提交部门 广州分公司/销售部（产品运营中心、号百信息服务中心）/创新业务营销团队 
+提交日期 2026-03-25 14:46:31 需求负责人  归档时间  
+需求描述 省公司要求广州小微ICT纳管到省小微ICT平台，其中面向装维2000元以下小微ICT“mini微”通过达人助手下单，回传省公司的纳管资料缺失业务接入号。前期已由客资中心、全渠道中心协同输出全量“mini微”业务的CRM申请单号（见附件），现申请业支中心协助根据CRM申请单号匹配业务接入号，业务接入号开头为ZNZWSQB。结果数据在CDAP自助分析板块赋权到销售部。 
+需求目标 匹配接入号 
+==================================================================
+取数口径：
+1、按申请单号（D列）取订单信息，字段包括：申请单号、订单编码、接入号、订单竣工时间
+2、订单时间范围在：2023-2026年
+3、结果数据在自助分析赋权到销售部					
+==================================================================
+GZ20250903808961556
+号码
+ZNZWSQB101497609
+ZNZWSQB101497610
+
+select * from zone_gz.tmp_view_xsb_XQGZ20260325
+where tg_req_code='GZ20250903808961556'
+tg_req_code	subs_code	acc_nbr
+GZ20250903808961556	200250903715841171	ZNZWSQB101497609
+GZ20250903808961556	200250903715841172	ZNZWSQB101497610
+
+==================================================================
+1、导入整理后的申请单（唯一及非重叠后）
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260325_req_only;
+create table if not exists zone_gz_yz.tmp_XQGZ20260325_req_only stored as orc as
+select 
+index1 as seq_id--序号
+,index2 as req_code--申请单号
+,index3 as remark--备注
+from zone_gz_yz.zone_gz_yz_xxxxx;
+
+-----------------------------------------
+2、导入附件全清单
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260325_req_all;
+create table if not exists zone_gz_yz.tmp_XQGZ20260325_req_all stored as orc as
+select 
+index1 as tg_subs_id--订单id
+,index2 as tg_subs_code--订单编码
+,index3 as tg_zt_code--中台单号
+--,index4 as --空白列
+,index5 as tg_req_code--CRM申请单
+,index6 as ch_cnt--重复次数
+,index7 as seq_id--订单序号
+,index8 as remark--备注
+from zone_gz_yz.zone_gz_yz_xxxxx;
+
+================================================================================
+3.1、用唯一的申请单编码清单 获取 历史订单信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260325_subs_hist;
+create table if not exists zone_gz_yz.tmp_XQGZ20260325_subs_hist stored as orc as
+select a.*,b.req_id,b.subs_id,b.subs_code,b.serv_id,b.acc_nbr,b.prod_id,b.action_id,b.act_date,b.subs_stat_date,b.subs_stat,b.subs_stat_reason
+from zone_gz_yz.tmp_XQGZ20260325_req as a--唯一的申请单编码清单
+join summary_ods_day_city.rpt_comm_ba_subs_hist_all as b on a.req_code=b.req_code and b.par_corp_id='200' 
+  and b.acc_nbr like 'ZNZWSQB%';--优先支撑时没此信息，根据后面提交的需求描述补充
+--建议加上b.action_id,
+--73530 
+
+-----------------------------------------
+3.2、用唯一的申请单编码清单 获取 当前订单信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260325_subs;
+create table if not exists zone_gz_yz.tmp_XQGZ20260325_subs stored as orc as
+select a.*,b.req_id,b.subs_id,b.subs_code,b.serv_id,b.acc_nbr,b.prod_id,b.action_id,b.act_date,b.subs_stat_date,b.subs_stat,b.subs_stat_reason
+from zone_gz_yz.tmp_XQGZ20260325_req as a--唯一的申请单编码清单
+join summary_ods_day_city.rpt_comm_ba_subs as b on a.req_code=b.req_code and b.par_corp_id='200' 
+  and b.acc_nbr like 'ZNZWSQB%';--优先支撑时没此信息，根据后面提交的需求描述补充
+--278个,--锁定号码后变成139个，没有号码为-1的情况了
+--建议加上b.action_id,
+
+-----------------------------------------
+3.3合并两次订单信息
+drop table if exists zone_gz_yz.tmp_XQGZ20260325_subs_all;
+create table if not exists zone_gz_yz.tmp_XQGZ20260325_subs_all stored as orc as
+select * from zone_gz_yz.tmp_XQGZ20260325_subs_hist
+union 
+select * from zone_gz_yz.tmp_XQGZ20260325_subs;
+
+--按后面的需求描述锁定号码开头后，不会出现号码为-1的情况了
+select * from zone_gz_yz.tmp_XQGZ20260325_subs_all;
+select count(1) from zone_gz_yz.tmp_XQGZ20260325_subs_all;--73530+139=73669
+select * from zone_gz_yz.tmp_XQGZ20260325_subs_all where req_code='GZ20250903808961556';
+
+-----------------------------------------
+3.4完善订单信息描述
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260325_subs_all_001;
+create table if not exists zone_gz_yz.tmp_XQGZ20260325_subs_all_001 stored as orc as
+select a.*
+,b.action_name
+,k.prod_name
+,e.attr_value_name as subs_stat_desc--订单状态描述
+,f.attr_value_name as subs_stat_reason_desc--订单状态原因描述
+from zone_gz_yz.tmp_XQGZ20260325_subs_all as a
+left join dws_crm_cfguse.dws_prod_service_offer_rel as b on a.action_id=b.prod_service_rel_id and b.city_id='200'--业务名称
+left join dws_crm_cfguse.dws_attr_value as e on a.subs_stat=e.attr_inner_value and e.attr_id='4000000059' and e.city_id='200'--订单状态描述
+left join dws_crm_cfguse.dws_attr_value as f on a.subs_stat_reason=f.attr_inner_value and f.attr_id='4000000065' and f.city_id='200'--订单状态原因描述
+left join dws_crm_cfguse.dws_product as k on a.prod_id=k.prod_id--产品名称
+;     
+
+-----------------------------------------
+4、用附件全清单保留原字段信息，生产最终清单暂保留
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.auto.convert.join=false;
+set hive.map.aggr=false;
+
+drop table if exists zone_gz_yz.tmp_XQGZ20260325_list;
+create table if not exists zone_gz_yz.tmp_XQGZ20260325_list stored as orc as
+select a.*
+,b.req_id,b.subs_id,b.subs_code,b.serv_id,b.acc_nbr,b.prod_id,b.prod_name,b.act_date,b.subs_stat_date
+,b.subs_stat,b.subs_stat_desc,b.subs_stat_reason,b.subs_stat_reason_desc
+,current_timestamp as load_date
+from zone_gz_yz.tmp_XQGZ20260325_req_all as a--附件全清单
+left join zone_gz_yz.tmp_XQGZ20260325_subs_all_001 as b on a.tg_req_code=b.req_code;
+
+
+5、生产视图赋权及回单
+========================================================【生产视图赋权及回单】
+#####提供给需求方的视图#####
+drop view if exists zone_gz.tmp_view_xsb_XQGZ20260325;
+create view if not exists zone_gz.tmp_view_xsb_XQGZ20260325
+(
+tg_subs_id               comment '附件订单id'
+,tg_subs_code            comment '附件订单编码'
+,tg_zt_code              comment '附件中台单号'
+,tg_req_code             comment '附件CRM申请单'
+,subs_code               comment '订单编码'
+,serv_id                 comment '号码服务标识'
+,acc_nbr                 comment '接入号'
+,act_date                comment '订单受理时间'
+,subs_stat_date          comment '订单最后状态时间'
+,subs_stat_reason_desc   comment '订单状态原因'
+,subs_stat_desc          comment '订单状态'
+,remark                  comment '附件信息备注'
+,load_date               comment '装载时间'
+)
+as
+select
+tg_subs_id
+,tg_subs_code
+,tg_zt_code
+,tg_req_code
+,subs_code
+,serv_id
+,acc_nbr
+,date_format(act_date,'yyyyMMdd') as act_date
+,date_format(subs_stat_date,'yyyyMMdd') as subs_stat_date
+,subs_stat_reason_desc
+,subs_stat_desc
+,remark
+,load_date
+from zone_gz_yz.tmp_XQGZ20260325_list
+

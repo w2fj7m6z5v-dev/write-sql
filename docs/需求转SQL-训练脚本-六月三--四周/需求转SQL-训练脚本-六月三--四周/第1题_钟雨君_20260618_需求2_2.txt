@@ -1,0 +1,36 @@
+需求原始内容：
+XQGZ2025110601829
+
+需求描述 销售点编码：4401123230258、网点名称：广州萝通通信电子技术有限公司，销售点编码：4401123181839、网点名称：美远计算机维修服务部(城中村)
+         麻烦业支帮忙提取该网点2025年1-10月份的宽带到达数
+
+需求梳理：
+根据提供的两个网点编码，匹配网点2025年1-10月份的宽带到达数
+
+输出字段：
+网点编码、网点名称、统计月份、宽带到达数
+
+-- 到达：在网且出账
+is_cancel_user=0 and is_cz=1
+
+-- 宽带 
+prod_type = 40
+
+-- 取这两个网点在2025年1-10月份的宽带到达
+drop table if exists tmp_XQGZ2025110601829_01;
+create table tmp_XQGZ2025110601829_01 as
+select serv_id,acc_nbr,channel_nbr,channel_name,par_month_id from dwm_yz_tb_comm_cm_all_mon_final 
+where par_month_id between 202501 and 202510 and channel_nbr in in ('4401123230258','4401123181839')
+and is_cancel_user=0 and is_cz=1 and prod_type = 40
+group by serv_id,acc_nbr,channel_nbr,channel_name,par_month_id;
+
+-- 计算各网点各月份的宽带到达数
+drop table if exists ads_XQGZ2025110601829;
+create table ads_XQGZ2025110601829 as
+select channel_nbr,channel_name,par_month_id,count(serv_id) from tmp_XQGZ2025110601829_01
+group by channel_nbr,channel_name,par_month_id;
+
+-- 检查数目
+select * from ads_XQGZ2025110601829;
+select count(1) from ads_XQGZ2025110601829; -- 20
+

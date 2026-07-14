@@ -1,0 +1,168 @@
+20260522巡检需求：
+请提供23-25年，百度公司(客户名包含“百度”关键字)涉及所有号码的出账清单，清单字段包括:客户名、号码、产品类型、揽装人、揽装人归属机构、
+号码收入局向、账期、出账金额、账期费用状态(已销账/欠费/欠不列)
+================================================================================================
+
+--锁定服务标识提供其他团队跑欠费及销账等相关信息：
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.ads_xcXQ20260522_bd_serv purge;
+create table if not exists zone_gz_yz.ads_xcXQ20260522_bd_serv
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select distinct serv_id
+from zone_gz_yz.dwm_yz_tb_comm_cm_all_mon_final
+where par_month_id>=202301
+  and par_month_id<=202512
+  and cust_name like '%百度%'
+;
+
+select count(1) from zone_gz_yz.ads_xcXQ20260522_bd_serv;--9704
+select * from zone_gz_yz.ads_xcXQ20260522_bd_serv; 
+
+
+
+--跑基础数据
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.ads_xcXQ20260522_bd_list_1 purge;
+create table if not exists zone_gz_yz.ads_xcXQ20260522_bd_list_1
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select par_month_id,serv_id,acc_nbr,prod_id,open_date,state
+,cust_nbr,cust_name,sales_id,sales_code,sales_name,subst_name--号码收入局向
+,fee,fee_new_tax
+from zone_gz_yz.dwm_yz_tb_comm_cm_all_mon_final
+where par_month_id>=202301
+  and par_month_id<=202512
+  and cust_name like '%百度%'
+;
+
+
+--揽装人信息
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.ads_xcXQ20260522_bd_list_2 purge;
+create table if not exists zone_gz_yz.ads_xcXQ20260522_bd_list_2
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select a.*
+,k.prod_name
+,b.salestaff_subst_name--揽装工号所属县分
+,c.org_id as salestaff_org_id--销售品订购揽装工号所属机构ID
+,d.org_name as salestaff_org_name--揽装工号所属机构名称 
+,e.attr_value_name as state_desc--使用状态 
+from zone_gz_yz.ads_xcXQ20260522_bd_list_1 as a
+left join dws_crm_cfguse.dws_product as k on a.prod_id=k.prod_id
+left join zone_gz_yz.dwm_yz_sales_man_outlers_final as b on a.sales_id=b.salestaff_id
+left join dws_crm_cfguse.dws_staff as c on a.sales_id=c.staff_id and c.city_id in ('0','93','200')--号码的揽装工号
+left join dws_crm_cfguse.dws_organization as d on c.org_id=d.org_id and d.city_id in ('0','93','200')
+left join dws_crm_cfguse.dws_attr_value as e on a.state=e.attr_inner_value and e.attr_id='4000000201' and e.city_id='200'--使用状态
+;
+ 
+ 
+--销账信息 
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.ads_xcXQ20260522_bd_list_3 purge;
+create table if not exists zone_gz_yz.ads_xcXQ20260522_bd_list_3
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select a.par_month_id,a.serv_id,a.acc_nbr,a.open_date,a.state_desc
+,a.prod_id,a.prod_name,a.cust_nbr,a.cust_name,a.subst_name
+,a.sales_id,a.sales_code,a.sales_name,a.salestaff_subst_name,a.salestaff_org_name
+,a.fee,a.fee_new_tax
+,b.billing_cycle_id,b.amount,b.amount_yjf,amount_wjf
+,case when b.amount_yjf>=b.amount then '已销账'
+      when b.amount_yjf>0 and b.amount_wjf>0 then '部分销账'
+      when b.amount_yjf<=0 and b.amount_wjf>0 then '未销账' else null end as is_yxz--是否已销账
+from zone_gz_yz.ads_xcXQ20260522_bd_list_2 as a
+left join zone_gz_yz.ads_xcXQ20260522_bd_serv_cz as b on a.serv_id=b.prod_inst_id 
+     and a.par_month_id=cast(substr(billing_cycle_id,1,6 ) as int )
+;
+
+
+--生成百度清单固定表
+use zone_gz_yz;
+set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.reduce.enabled=false;
+set hive.fetch.task.conversion=none;
+
+drop table if exists zone_gz_yz.ads_xcXQ20260522_bd_list_finial purge;
+create table if not exists zone_gz_yz.ads_xcXQ20260522_bd_list_finial
+row format delimited fields terminated by '\u0001' stored as orc tblproperties('orc.compression'='snappy')        
+as 
+select par_month_id,serv_id,acc_nbr,open_date,state_desc,prod_id,prod_name,cust_nbr,cust_name,subst_name
+,sales_id,sales_code,sales_name,salestaff_subst_name,salestaff_org_name
+,billing_cycle_id,amount,amount_yjf,amount_wjf,is_yxz
+from zone_gz_yz.ads_xcXQ20260522_bd_list_3;
+
+
+
+结果表名：zone_gz_yz.ads_xcXQ20260522_bd_list_finial																			
+par_month_id	serv_id	acc_nbr	open_date	state_desc	prod_id	prod_name	cust_nbr	cust_name	subst_name	sales_id	sales_code	sales_name	salestaff_subst_name	salestaff_org_name	billing_cycle_id	amount	amount_yjf	amount_wjf	is_yxz
+统计月份	服务标识	接入号	开通时间	使用状态	产品ID	产品名称	产权客户编码	客户名称	划小局向	揽装工号	揽装人编码	揽装人名称	揽装人所属县分	揽装人所属机构	出账账期	出账金额元	已缴费金额元	未缴费金额元	是否已销账
+
+
+--抽查
+select *
+from zone_gz_yz.ads_xcXQ20260522_bd_list_finial
+where acc_nbr='GDTR2146947940'
+order by par_month_id
+
+
+/*
+翁伟琳 5/22 17:11:21
+ads_xcXQ20260522_bd_serv_cz ----billing_cycle_id账期，amount出账金额，amount_yjf已缴费金额，amount_wjf未缴费金额，单位都是元
+
+李倩 5/22 17:13:48
+是不是少了个“是否已销账” 的字段
+
+庄雁宇 5/22 17:14:02
+已缴费就是已销账
+
+庄雁宇 5/22 17:14:18
+一个账单，可能存在部分销账
+
+李倩 5/22 17:14:41
+那已缴费没缴完算已销账吗
+
+庄雁宇 5/22 17:14:54
+如果交了一部分，没交一部分，就是部分销账
+
+庄雁宇 5/22 17:15:37
+[图片]这感觉有其他想法
+
+李倩 5/22 17:16:19
+如果已缴费大于等于出账，就是“已销账”，已缴费大于0小于出账，就是“部分销账”，已缴费小于0或为空就是“未销账”，是这样吗？
+
+庄雁宇 5/22 17:20:28
+已缴费>=出账金额 已销账
+已缴费>0，且未缴费>0 部分销账
+已缴费<=0，且未缴费>0 未销账
+
+庄雁宇 5/22 17:20:33
+应该这样准确点
+
+庄雁宇 5/22 17:21:00
+里面有些是null
+
+李倩 5/22 17:21:42
+ @张云娇  那娇姐再帮忙按这个补打一个是否已销账字段
+*/
+  
+ 
+ 
+ 

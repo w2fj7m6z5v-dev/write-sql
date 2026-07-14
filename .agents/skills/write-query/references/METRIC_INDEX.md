@@ -1,6 +1,8 @@
 # 指标索引（运行时）
 
 > 统一的运行时指标索引。**仅当用户命中标准指标名时读取**；普通入网/到达/规模需求先走 `ROUTING.md`。命中后打开 `metric_file` 查看技术口径 SQL；`table_files` 只用于快速定位 A 层表文档。
+>
+> 分类口径（如单移/单宽/融合）见下方「分类口径」分区，用于 WHERE 条件筛选，不产生度量值。
 
 ## 使用规则
 
@@ -118,3 +120,11 @@
 | M-TOPIC-REV-011 | 一次性收入 | 专题 | 收入 | 月 | （修改结算）YZSR子流程-1-收入生产 | tables/097_基本面月清单.md, tables/048_全量科目级收入.md | metrics/专题/M-TOPIC-REV-011_一次性收入.md |
 | M-TOPIC-SMB-001 | 视联网入网数 | 专题 | 小业务 | 日/月/年 | 视联网发展 | tables/057_视联网发展规模清单.md | metrics/专题/M-TOPIC-SMB-001_视联网入网数.md |
 | M-TOPIC-SMB-002 | 视联网到达数 | 专题 | 小业务 | 日/月/年 | 视联网发展 | tables/057_视联网发展规模清单.md | metrics/专题/M-TOPIC-SMB-002_视联网到达数.md |
+
+## 分类口径
+
+> 分类口径是**标签型**定义，产出 WHERE 条件而非度量值。用于统一产品大类（单移/单宽/融合/固话）的筛选条件，跨表复用。
+
+| metric_id | metric_name | domain | category | 适用表 | metric_file |
+|---|---|---|---|---|---|
+| M-CLASS-PROD-001 | 产品大类分类 | 分类 | 产品分类 | 所有含 `prod_type` + `is_rh_ykj` 的表 | metrics/分类/M-CLASS-PROD-001_产品大类分类.md |
