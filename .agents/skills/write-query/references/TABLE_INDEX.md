@@ -160,3 +160,4 @@
 | 141 | 附属产品订单表族 | summary_ods_day_city.rpt_comm_ba_sub_prod | summary_ods_day_city.rpt_comm_ba_sub_prod（日-当前）；summary_ods_day_city.rpt_comm_ba_sub_prod_hist（日-历史）；iodata_ods_month_city.rpt_comm_ba_sub_prod_mon（月-当前）；iodata_ods_month_city.rpt_comm_ba_sub_prod_hist_mon（月-历史） | tables/141_附属产品订单表族.md |
 | 142 | 专线月租表 | ads_yz_sx_yz | ads_yz_sx_yz | tables/142_专线月租表.md |
 | 143 | 非费用账目表 | dws_acct.dws_unacct_item | dws_acct.dws_unacct_item | tables/143_非费用账目表.md |
+| 144 | CRM设备订单关系表 | dws_crm_order.dws_ord_prod_res_inst_rel | dws_crm_order.dws_ord_prod_res_inst_rel | tables/144_CRM设备订单关系表.md |
