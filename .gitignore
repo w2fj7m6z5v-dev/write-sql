@@ -4,6 +4,7 @@ Thumbs.db
 __pycache__/
 *.pyc
 *.base
+.write-query-profile.md
 
 # Local tool state
 .claudian/
