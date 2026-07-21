@@ -52,6 +52,12 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## 工作流程
 
+### 本地使用者权限配置
+
+- `write-query` 运行前必须读取仓库根目录 `.write-query-profile.md`；该文件是当前克隆仓库的本地身份配置，已被 Git 忽略。
+- 首次使用可执行 `Copy-Item .write-query-profile.example.md .write-query-profile.md`；默认无需填写，分局配置 `access_scope: subst` 与 `subst-code`，销售部/政企部配置 `access_scope: sales`。
+- 不要把个人身份写入本 `AGENTS.md`；需求文本中的分局、销售部、政企部等词不改变已配置的权限域。
+
 ### 编写 Hive SQL
 1. 以 `write-query/SKILL.md` 为唯一运行时流程权威。
 2. 主表选择 → `TABLE_INDEX.md` + `ROUTING.md`；标准指标 → `METRIC_INDEX.md` + 命中单指标文件。

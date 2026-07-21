@@ -216,6 +216,32 @@ def rule_ctas_missing_drop_purge(sql: str) -> list[Finding]:
     return findings
 
 
+def rule_chinese_identifier(sql: str) -> list[Finding]:
+    """检测中文别名/标识符（SELECT 子句中用中文做字段别名）。
+
+    RULES.md 要求输出字段别名必须使用英文 snake_case，禁止 `AS 分局`、`AS 营服`
+    等中文标识符。此规则先剥离单引号字符串字面量，再查找残留的连续中文——
+    残留中文即裸标识符/别名，不含合法的字符串常量中文值。
+    """
+    findings: list[Finding] = []
+    # 剥离单引号字符串，避免合法的中文数据值（如 '普通宽带'）被误判
+    no_strings = re.sub(r"'[^']*'", "''", sql)
+    # 匹配 2+ 连续中文字符（裸别名至少两个字，如"分局名称"）
+    pattern = re.compile(r'[一-龥]{2,}')
+    for m in pattern.finditer(no_strings):
+        token = m.group(0)
+        findings.append(
+            Finding(
+                rule_id="R008",
+                severity="risk",
+                message=f"疑似中文别名/标识符，应改为英文 snake_case: {token}",
+                line=_line_of(sql, m.start()),
+                snippet=_snippet_around(sql, m.start()),
+            )
+        )
+    return findings
+
+
 def rule_subs_stat_reason_filter(sql: str) -> list[Finding]:
     """动作类统计常忘记排除撤单作废 subs_stat_reason IN ('1200','1300')。
 
@@ -257,6 +283,7 @@ def build_rules() -> list[Rule]:
         Rule("R005", "risk", "069 表必须用 dwm_* 前缀", rule_069_old_prefix),
         Rule("R006", "risk", "CTAS 必须前置 drop table if exists ... purge", rule_ctas_missing_drop_purge),
         Rule("R007", "warn", "动作类统计应排除撤单作废", rule_subs_stat_reason_filter),
+        Rule("R008", "risk", "禁止中文别名/标识符", rule_chinese_identifier),
     ]
 
 

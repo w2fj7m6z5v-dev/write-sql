@@ -89,6 +89,7 @@ runtime: true
 | 主卡号码 | 附件副卡 `acc_nbr` | 副卡查主卡 | 069（不额外补表） | 069 `zk_acc_nbr` | 不默认 `is_vice_card=1` |
 | 指定层级地址 ID/名称 | 069 `serv_addr_id` | 号码清单补地址层级 | 079 地址维表 | → `SC-006` | 目标层级由用户给出；地址 ID 统一转字符 |
 | 揽装机构 | `salestaff_subst_id`、`salestaff_branch_id` | 主表只有机构 ID | 018 机构维表 | 分局 `salestaff_subst_id = org_id AND levs=3`；营服 `salestaff_branch_id = org_id AND levs=4` | 多次 JOIN 要检查别名 |
+| 揽装人工号 → 揽装分局 | 附件 `sales_code` + 竣工月份 | 附件清单有揽装人工号但缺揽装局向/分局 | 113 揽装所属表月表 `dwd_yz_sales_man_outlers_mon_final` | `sales_code = 113.sales_code` 且 `par_month_id` 对齐竣工月份；`status_cd='1000'` 有效；输出 `subst_name`（网点所属区县） | `sales_code` 不唯一，113 侧先 `distinct sales_code, subst_name, par_month_id` 去重；当前月份快照用日表 `dwd_yz_sales_man_outlers_final` |
 | 双线速率 | 069 `speed_value`；033 `speed_value` | 主路径已在 069 时不补表；已补 033 或用户指定双线清单口径时可取 033 | 033 双线全量清单（可选） | 若补 033，按 `acc_nbr + par_month_id` 关联 | 不要只为速率强行补 033；两边均可取时跟随主路径 |
 | 双线月租 | 033 `yz_cs` | 069 不提供双线月租或用户明确要月租 | 033 双线全量清单 | `主表.acc_nbr = 033.acc_nbr` 且 `主表.par_month_id = 033.par_month_id` | 033 同号码同月可能多行，必要时按 `load_date` 去重 |
 | 专线月租（旧口径） | `serv_id` | 069 不提供专线月租或用户明确要专线月租 | 142 专线月租表 `ads_yz_sx_yz` | `主表.serv_id = 142.serv_id AND 主表.par_month_id = 142.par_month_id`；取 `yz_cs_old` | 与 033 yz_cs 双线口径不同；本表专线旧口径 |
